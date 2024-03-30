@@ -28,6 +28,7 @@ CREATE TABLE media_mp4 (
     media_id INTEGER PRIMARY KEY NOT NULL,
     post_id INTEGER NOT NULL,
     file_name TEXT NOT NULL,
+    thumbnail TEXT NOT NULL,
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
 
