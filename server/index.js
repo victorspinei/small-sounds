@@ -42,7 +42,12 @@ app.post('/signup', (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
+    const trap = req.body.trap;
 
+    if (trap !== '') {
+        res.send("Extra input values <br> <a href=\"/signup\">Go Back!</a>");
+        return;
+    }
     if (!utils.ValidateEmail(email)) {
         res.send("Invalid email <br> <a href=\"/signup\">Go Back!</a>");
         return;
