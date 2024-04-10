@@ -1,52 +1,25 @@
 const express = require('express');
-const session = require('express-session')
-const cookieParser = require('cookie-parser')
-const app = express();
-const port = 3000;
-app.use(cookieParser())
-app.use(session({
-    secret: 'secret-key',
-    resave: false,
-    saveUninitialized: true
-}))
-
-const bcrypt = require('bcrypt')
-const saltRounds = 10;
-
-const bodyParser = require('body-parser');
-
 const path = require('path')
-const fs = require('fs')
-
-const sqlite3 = require('sqlite3').verbose();
-
-
-const db = new sqlite3.Database(path.join(__dirname, "./server.db"), (err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err.message);
-    } else {
-        console.log('Connected to the database.');
-    }
-})
-
 const utils = require('./utils.js')
+const bcrypt = require('bcrypt')
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+const db = require('./database');
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/index.html"));
+const router = express.Router()
+
+router.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/login.html"));
+router.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/login.html"));
 });
 
-app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, "./public/signup.html"));
+router.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/signup.html"));
 });
 
-app.post('/signup', (req, res) => {
+router.post('/signup', (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
@@ -75,7 +48,7 @@ app.post('/signup', (req, res) => {
         if (rows.length !== 0) {
             res.send("Username already exists<br> <a href=\"/signup\">Go Back!</a>");
         } else {
-            bcrypt.hash(password, saltRounds, (err, hash) => {
+            bcrypt.hash(password, 10, (err, hash) => {
                 if (err) {
                     console.error('Error generating hash:', err.message);
                     res.status(500).send('Internal Server Error');
@@ -96,7 +69,7 @@ app.post('/signup', (req, res) => {
     });
 });
 
-app.post('/login', (req, res) => {
+router.post('/login', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
     const trap = req.body.trap;
@@ -136,7 +109,7 @@ app.post('/login', (req, res) => {
 
 });
 
-app.get('/logout', (req, res) => {
+router.get('/logout', (req, res) => {
     // Clear session
     req.session.destroy();
     // Clear login cookie
@@ -144,7 +117,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login'); // Redirect to login page
 });
 
-app.get('/example', (req, res) => {
+router.get('/example', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
@@ -156,7 +129,4 @@ app.get('/example', (req, res) => {
     }
 });
 
-
-app.listen(port, () => {
-    console.log('http://localhost:3000/')
-});
+module.exports = router;
