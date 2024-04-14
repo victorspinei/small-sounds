@@ -2,12 +2,17 @@ const express = require('express');
 const path = require('path')
 const utils = require('./utils.js')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
 
 const db = require('./database');
 
 const router = express.Router()
 
 router.get('/', (req, res) => {
+    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+        res.redirect('/login');
+        return;
+    }     
     res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
@@ -20,6 +25,7 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', (req, res) => {
+    // TODO: FIX ADDING TO THE SECOND TABLE
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
@@ -60,8 +66,31 @@ router.post('/signup', (req, res) => {
                             res.status(500).send('Internal Server Error');
                             return;
                         }
-                        console.log('User registered successfully');
-                        res.redirect('/login')
+                    });
+                    db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
+                        if (err) {
+                            console.error('Error selecting data:', err.message);
+                            res.status(500).send('Internal Server Error');
+                            return;
+                        } else {
+                            db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user[0].user_id, path.join(__dirname, `../media/users/${user[0].username}/README.md`), path.join(__dirname, "../media/images/default_profile.png")], (err) => {
+                                if (err) {
+                                    console.error('Error inserting data:', err.message);
+                                    res.status(500).send('Internal Server Error');
+                                    return;
+                                } else {
+                                    fs.mkdir(path.join(__dirname, `../media/users/${user[0].username}`), (error) => {
+                                        if (error) {
+                                            console.error('Error creating directory:', error.message);
+                                            res.status(500).send('Internal Server Error');
+                                            return;
+                                        } else {
+                                            res.redirect('/login')
+                                        }
+                                    })
+                                }
+                            });
+                        }
                     });
                 }
             });

@@ -7,28 +7,28 @@ CREATE TABLE users (
     email TEXT NOT NULL
 );
 
+CREATE TABLE profile (
+    profile_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    markdown TEXT NOT NULL,
+    song TEXT,
+    picture TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+
 CREATE TABLE posts (
     post_id INTEGER PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     likes INTEGER DEFAULT 0,
-    media_type TEXT NOT NULL,
     posted DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
-CREATE TABLE media_mp3 (
+CREATE TABLE media (
     media_id INTEGER PRIMARY KEY NOT NULL,
     post_id INTEGER NOT NULL,
     file_name TEXT NOT NULL,
-    FOREIGN KEY (post_id) REFERENCES posts (post_id)
-);
-
-CREATE TABLE media_mp4 (
-    media_id INTEGER PRIMARY KEY NOT NULL,
-    post_id INTEGER NOT NULL,
-    file_name TEXT NOT NULL,
-    thumbnail TEXT NOT NULL,
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
 
