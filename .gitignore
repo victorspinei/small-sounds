@@ -17,3 +17,5 @@ flake.lock
 .DS_Store
 Thumbs.db
 
+# Ignore the media folder
+media/

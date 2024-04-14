@@ -87,7 +87,7 @@ router.post('/signup', (req, res) => {
                                 res.status(500).send('Internal Server Error');
                                 return;
                             } else {
-                                const content = `Hello, my name is ${username}!\n`;
+                                const content = utils.GetContent(username);
                                 fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
                                 res.redirect('/login');
                             }
