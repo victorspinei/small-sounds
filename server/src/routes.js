@@ -25,7 +25,6 @@ router.get('/signup', (req, res) => {
 });
 
 router.post('/signup', (req, res) => {
-    // TODO: FIX ADDING TO THE SECOND TABLE
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
@@ -43,6 +42,7 @@ router.post('/signup', (req, res) => {
         res.send("Password too short<br> <a href=\"/signup\">Go Back!</a>");
         return;
     }
+
     db.all('SELECT * FROM users WHERE username = ?', username, (err, rows) => {
         if (err) {
             console.error('Error selecting data:', err.message);
@@ -50,7 +50,7 @@ router.post('/signup', (req, res) => {
             return;
         }
 
-        // Check if any rows were returned
+        // Check if username already exists
         if (rows.length !== 0) {
             res.send("Username already exists<br> <a href=\"/signup\">Go Back!</a>");
         } else {
@@ -59,40 +59,41 @@ router.post('/signup', (req, res) => {
                     console.error('Error generating hash:', err.message);
                     res.status(500).send('Internal Server Error');
                     return;
-                } else {
-                    db.run('INSERT INTO users (username, email, hash, joined) VALUES (?, ?, ?, ?)', [username, email, hash, (new Date()).toDateString()], (err) => {
-                        if(err) {
-                            console.error('Error inserting data:', err.message);
-                            res.status(500).send('Internal Server Error');
-                            return;
-                        }
-                    });
-                    db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
-                        if (err) {
-                            console.error('Error selecting data:', err.message);
-                            res.status(500).send('Internal Server Error');
-                            return;
-                        } else {
-                            db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user[0].user_id, path.join(__dirname, `../media/users/${user[0].username}/README.md`), path.join(__dirname, "../media/images/default_profile.png")], (err) => {
-                                if (err) {
-                                    console.error('Error inserting data:', err.message);
-                                    res.status(500).send('Internal Server Error');
-                                    return;
-                                } else {
-                                    fs.mkdir(path.join(__dirname, `../media/users/${user[0].username}`), (error) => {
-                                        if (error) {
-                                            console.error('Error creating directory:', error.message);
-                                            res.status(500).send('Internal Server Error');
-                                            return;
-                                        } else {
-                                            res.redirect('/login')
-                                        }
-                                    })
-                                }
-                            });
-                        }
-                    });
                 }
+
+                // Insert user into users table
+                db.run('INSERT INTO users (username, email, hash, joined) VALUES (?, ?, ?, ?)', [username, email, hash, (new Date()).toDateString()], function(err) {
+                    if (err) {
+                        console.error('Error inserting data into users table:', err.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+
+                    // Get the user_id of the inserted user
+                    const user_id = this.lastID;
+
+                    // Insert profile for the user
+                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, path.join(__dirname, `../media/users/${username}/README.md`), path.join(__dirname, "../media/images/default_profile.png")], function(err) {
+                        if (err) {
+                            console.error('Error inserting data into profile table:', err.message);
+                            res.status(500).send('Internal Server Error');
+                            return;
+                        }
+
+                        // Create user directory and README file
+                        fs.mkdir(path.join(__dirname, `../media/users/${username}`), (error) => {
+                            if (error) {
+                                console.error('Error creating directory:', error.message);
+                                res.status(500).send('Internal Server Error');
+                                return;
+                            } else {
+                                const content = `Hello, my name is ${username}!\n`;
+                                fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
+                                res.redirect('/login');
+                            }
+                        });
+                    });
+                });
             });
         }
     });
