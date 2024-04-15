@@ -73,7 +73,7 @@ router.post('/signup', (req, res) => {
                     const user_id = this.lastID;
 
                     // Insert profile for the user
-                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, path.join(__dirname, `../media/users/${username}/README.md`), path.join(__dirname, "../media/images/default_profile.png")], function(err) {
+                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "../media/images/default_profile.png"], function(err) {
                         if (err) {
                             console.error('Error inserting data into profile table:', err.message);
                             res.status(500).send('Internal Server Error');
@@ -126,7 +126,9 @@ router.post('/login', (req, res) => {
                 } else {
                     if (result) {
                         req.session.isLoggedIn = true;
+                        req.session.username = username;
                         res.cookie('loggedIn', true, {maxAge: 900000, httpOnly: true });
+                        res.cookie('username', username, {maxAge: 900000, httpOnly: true });
                         res.redirect('/')
                     } else {
                         res.send("Passwords do not match<br> <a href=\"/login\">Go Back!</a>");
@@ -144,14 +146,53 @@ router.get('/logout', (req, res) => {
     req.session.destroy();
     // Clear login cookie
     res.clearCookie('loggedIn');
+    res.clearCookie('username');
     res.redirect('/login'); // Redirect to login page
 });
 
-router.get('/example', (req, res) => {
+router.get('/dashboard', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
-        res.render('example');
+        const username = req.session.username || req.cookies.username;
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
+            if (err) {
+                console.error('Error selecting data:', err.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (er, profile) => {
+                if (er) {
+                    console.error('Error selecting data:', er.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                const markdown = path.join(__dirname, profile[0].markdown);
+                const song = profile[0].song ? path.join(profile[0].song) : undefined;
+                const src = path.join(__dirname, profile[0].picture);
+                const content = fs.readFileSync(markdown, 'utf-8');
+
+                res.render('dashboard', {username: username, src: src, content: content});
+            });
+        });
+
     } else {
         // User is not logged in
         // Redirect to login page or show an error message

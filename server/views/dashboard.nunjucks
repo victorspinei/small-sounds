@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ src }}" alt="profile picture">
+    <img src="../media/images/default_profile.png" alt="profile picture">
+    <h1>Welcome {{ username }}</h1>
+    
+    <div style="display: flex; gap: 2rem; margin-bottom: 8px;">
+        <a style="background-color: red; color: white; border-radius: 5%;" href="/logout">Log Out</a>
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/login">Log In</a>
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/signup">Sign Up</a>
+    </div>
+    <div style="display: flex; gap: 2rem;">
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/dashboard">Modify README</a>
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/dashboard">Modify Picture</a>
+        <a style="background-color: gold; color: white; border-radius: 5%;" href="/dashboard">Add Song to Profile</a>
+    </div>
+
+    <textarea name="README" id="readme" cols="100" rows="50">{{ content }}</textarea>
+</body>
+</html>
