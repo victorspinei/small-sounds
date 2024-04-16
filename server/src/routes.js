@@ -184,7 +184,7 @@ router.get('/dashboard', (req, res) => {
                     return;
                 }
 
-                const song = profile[0].song ? path.join(profile[0].song) : undefined;
+                const song = profile[0].song ? profile[0].song : undefined;
                 const src = profile[0].picture;
                 const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
 
