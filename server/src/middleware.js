@@ -26,6 +26,4 @@ nunjucks.configure(path.join(__dirname, '../views'), {
 
 app.set('view engine', 'nunjucks');
 
-app.use(express.static(path.join(__dirname, '../public')));
-
 module.exports = app;

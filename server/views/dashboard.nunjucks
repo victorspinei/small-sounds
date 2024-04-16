@@ -11,8 +11,7 @@
     </style>
 </head>
 <body>
-    <img src="{{ src }}" alt="profile picture">
-    <img src="../media/images/default_profile.png" alt="profile picture">
+    <img height="100" src="/images/default_profile.png" alt="profile picture">
     <h1>Welcome {{ username }}</h1>
     
     <div style="display: flex; gap: 2rem; margin-bottom: 8px;">

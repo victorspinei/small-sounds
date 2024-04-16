@@ -13,15 +13,15 @@ router.get('/', (req, res) => {
         res.redirect('/login');
         return;
     }     
-    res.sendFile(path.join(__dirname, "../public/index.html"));
+    res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
 router.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, "../public/login.html"));
+    res.sendFile(path.join(__dirname, "../public" ,"login.html"));
 });
 
 router.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, "../public/signup.html"));
+    res.sendFile(path.join(__dirname, "../public", "signup.html"));
 });
 
 router.post('/signup', (req, res) => {
@@ -73,7 +73,7 @@ router.post('/signup', (req, res) => {
                     const user_id = this.lastID;
 
                     // Insert profile for the user
-                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "../media/images/default_profile.png"], function(err) {
+                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "/images/default_profile.png"], function(err) {
                         if (err) {
                             console.error('Error inserting data into profile table:', err.message);
                             res.status(500).send('Internal Server Error');
@@ -154,7 +154,7 @@ router.get('/dashboard', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
-        const username = req.session.username || req.cookies.username;
+        const username = req.cookies.username;
 
         db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
             if (err) {
@@ -184,10 +184,9 @@ router.get('/dashboard', (req, res) => {
                     return;
                 }
 
-                const markdown = path.join(__dirname, profile[0].markdown);
                 const song = profile[0].song ? path.join(profile[0].song) : undefined;
-                const src = path.join(__dirname, profile[0].picture);
-                const content = fs.readFileSync(markdown, 'utf-8');
+                const src = profile[0].picture;
+                const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
 
                 res.render('dashboard', {username: username, src: src, content: content});
             });
