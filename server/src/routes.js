@@ -1,8 +1,9 @@
 const express = require('express');
-const path = require('path')
-const utils = require('./utils.js')
-const bcrypt = require('bcrypt')
-const fs = require('fs')
+const path = require('path');
+const utils = require('./utils.js');
+const bcrypt = require('bcrypt');
+const fs = require('fs');
+const mutler = require('multer');
 
 const db = require('./database');
 
@@ -154,7 +155,7 @@ router.get('/dashboard', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
-        const username = req.cookies.username;
+        const username = req.cookies.username || req.session.username;
 
         db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
             if (err) {
@@ -198,5 +199,20 @@ router.get('/dashboard', (req, res) => {
         res.redirect('/login');
     }
 });
+
+router.get('/uploadProfilePicture', (req, res) => {
+    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+        res.redirect('/login');
+        return;
+    }     
+    res.sendFile(path.join(__dirname, "../public", "picture.html"));
+});
+
+router.post('/uploadProfilePicture', (req, res, next) => {
+    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+        res.redirect('/login');
+        return;
+    }     
+})
 
 module.exports = router;

@@ -21,7 +21,7 @@
     </div>
     <div style="display: flex; gap: 2rem;">
         <a style="background-color: blue; color: white; border-radius: 5%;" href="/dashboard">Modify README</a>
-        <a style="background-color: blue; color: white; border-radius: 5%;" href="/dashboard">Modify Picture</a>
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/uploadProfilePicture">Modify Picture</a>
         <a style="background-color: gold; color: white; border-radius: 5%;" href="/dashboard">Add Song to Profile</a>
     </div>
 
