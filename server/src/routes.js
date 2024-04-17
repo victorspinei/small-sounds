@@ -3,11 +3,11 @@ const path = require('path');
 const utils = require('./utils.js');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
-const mutler = require('multer');
+const uploadImage = require('./upload.js');
 
 const db = require('./database');
 
-const router = express.Router()
+const router = express.Router();
 
 router.get('/', (req, res) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
@@ -78,6 +78,11 @@ router.post('/signup', (req, res) => {
                         if (err) {
                             console.error('Error inserting data into profile table:', err.message);
                             res.status(500).send('Internal Server Error');
+
+                            db.run('DELETE FROM users WHERE user_id = ?', user_id, (deletionError)=> {
+                                console.log(deletionError);
+                            });
+
                             return;
                         }
 
@@ -86,6 +91,7 @@ router.post('/signup', (req, res) => {
                             if (error) {
                                 console.error('Error creating directory:', error.message);
                                 res.status(500).send('Internal Server Error');
+                                utils.removeFolderRecursive(path.join(__dirname, `../media/users/${username}`));
                                 return;
                             } else {
                                 const content = utils.GetContent(username);
@@ -139,7 +145,6 @@ router.post('/login', (req, res) => {
             });
         }
     });
-
 });
 
 router.get('/logout', (req, res) => {
@@ -186,7 +191,7 @@ router.get('/dashboard', (req, res) => {
                 }
 
                 const song = profile[0].song ? profile[0].song : undefined;
-                const src = profile[0].picture;
+                const src = profile[0].picture || "/image/default_profile.png";
                 const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
 
                 res.render('dashboard', {username: username, src: src, content: content});
@@ -208,11 +213,61 @@ router.get('/uploadProfilePicture', (req, res) => {
     res.sendFile(path.join(__dirname, "../public", "picture.html"));
 });
 
-router.post('/uploadProfilePicture', (req, res, next) => {
-    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
         res.redirect('/login');
         return;
     }     
-})
+    const username = req.cookies.username;
+    uploadImage(req, res, (uploadingError) => {
+        if (uploadingError) {
+            console.error('Error uploading image:', uploadingError.message);
+            res.status(500).send('Internal Server Error');
+            return;
+        } 
+        const filename = req.file.filename;
+        db.all('SELECT * FROM users WHERE username = ?', username, (userError, user) => {
+            if (userError) {
+                console.error('Error selecting data:', userError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (selectingError, profile) => {
+                if (selectingError) {
+                    console.error('Error selecting data:', selectingError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile[0].picture != "/images/default_profile.png") {
+                    fs.unlink(path.join(__dirname, "../media/", profile[0].picture), (unlinkingError)=> {
+                        if (unlinkingError) {
+                            console.error('Error removing file:', unlinkingError);
+                            return;
+                        }
+                        console.log('File removed successfully');
+                    });
+                }
+
+            });
+            db.run('UPDATE profile SET picture = ? WHERE user_id = ?', [`/images/${filename}`, user[0].user_id], (updatingError)=> {
+                if (updatingError) {
+                    console.error('Error updating data into profile table:', updatingError.message);
+                    res.status(500).send('Internal Server Error');
+
+                    fs.unlink(path.join(__dirname, "../media/images/", filename), (unlinkingError)=> {
+                        if (unlinkingError) {
+                            console.error('Error removing file:', unlinkingError);
+                            return;
+                        }
+                        console.log('File removed successfully');
+                    });
+
+                    return;
+                }
+                res.redirect('/dashboard');
+            })
+        })
+    });
+});
 
 module.exports = router;
