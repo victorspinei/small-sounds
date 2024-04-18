@@ -4,6 +4,7 @@ const utils = require('./utils.js');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const uploadImage = require('./upload.js');
+const { body, validationResult } = require('express-validator');
 
 const db = require('./database');
 
@@ -25,7 +26,14 @@ router.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, "../public", "signup.html"));
 });
 
-router.post('/signup', (req, res) => {
+router.post('/signup', [
+    body('email').isEmail().withMessage('Invalid email format'),
+    body('trap').isEmpty().withMessage('Extra input values are not allowed'),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send(errors.array().map(error => error.msg).join('<br>'));
+    }
     const email = req.body.email;
     const username = req.body.username;
     const password = req.body.password;
@@ -43,6 +51,7 @@ router.post('/signup', (req, res) => {
         res.send("Password too short<br> <a href=\"/signup\">Go Back!</a>");
         return;
     }
+
 
     db.all('SELECT * FROM users WHERE username = ?', username, (err, rows) => {
         if (err) {
@@ -106,7 +115,13 @@ router.post('/signup', (req, res) => {
     });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', [
+    body('trap').isEmpty().withMessage('Extra input values are not allowed'),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send(errors.array().map(error => error.msg).join('<br>'));
+    }
     const username = req.body.username;
     const password = req.body.password;
     const trap = req.body.trap;
@@ -134,8 +149,8 @@ router.post('/login', (req, res) => {
                     if (result) {
                         req.session.isLoggedIn = true;
                         req.session.username = username;
-                        res.cookie('loggedIn', true, {maxAge: 900000, httpOnly: true });
-                        res.cookie('username', username, {maxAge: 900000, httpOnly: true });
+                        res.cookie('loggedIn', true, {maxAge: 900000, httpOnly: true, secure: true });
+                        res.cookie('username', username, {maxAge: 900000, httpOnly: true, secure: true });
                         res.redirect('/')
                     } else {
                         res.send("Passwords do not match<br> <a href=\"/login\">Go Back!</a>");
@@ -160,7 +175,7 @@ router.get('/dashboard', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
-        const username = req.cookies.username || req.session.username;
+        const username = req.session.username;
 
         db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
             if (err) {
@@ -217,7 +232,7 @@ router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLo
         res.redirect('/login');
         return;
     }     
-    const username = req.cookies.username;
+    const username = req.session.username;
     uploadImage(req, res, (uploadingError) => {
         if (uploadingError) {
             console.error('Error uploading image:', uploadingError.message);
@@ -268,6 +283,64 @@ router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLo
             })
         })
     });
+});
+
+router.get('/updateProfileReadme', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        // User is logged in
+        // Proceed with rendering the dashboard
+        const username = req.session.username;
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
+            if (err) {
+                console.error('Error selecting data:', err.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (er, profile) => {
+                if (er) {
+                    console.error('Error selecting data:', er.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
+
+                res.render('markdown', { content: content });
+            });
+        });
+
+    } else {
+        // User is not logged in
+        // Redirect to login page or show an error message
+        res.redirect('/login');
+    }
+});
+
+router.post('/updateProfileReadme', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        const content = req.body.readme;
+        const username = req.session.username;
+        fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
+        res.redirect('/dashboard');
+    } else {
+        res.redirect('/login');
+    }
 });
 
 module.exports = router;

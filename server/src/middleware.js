@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(express.static('media'));
+app.use(express.static('static'));
 
 nunjucks.configure(path.join(__dirname, '../views'), {
     autoescape: true,
