@@ -7,13 +7,13 @@
 </head>
 <body>
     <p>Post a Cover or an original song</p>
-    <form action="" enctype="multipart/form-data" method="post" style="display: flex; flex-direction: column; justify-content: start; align-items: start;">
-        <p>Add the song</p>
-        <input type="file" required name="song">
+    <form action="/postSong" enctype="multipart/form-data" method="post" style="display: flex; flex-direction: column; justify-content: start; align-items: start;">
+        <p>Add a song</p>
+        <input type="file" required name="file">
         <p></p>
         <input required type="text" name="title" placeholder="Post title...">
-        <select required name="type">
-            <option disabled selected value="">Select post type</option>
+        <p>Select post type</p>
+        <select required name="post_type">
             <option value="cover">Cover</option>
             <option value="original">Original Song</option>
         </select>
