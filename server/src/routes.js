@@ -343,4 +343,12 @@ router.post('/updateProfileReadme', (req, res) => {
     }
 });
 
+router.get('/post', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        res.sendFile(path.join(__dirname, "../public", "post.html"));
+    } else {
+        res.redirect('/login');
+    }
+});
+
 module.exports = router;
