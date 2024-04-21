@@ -23,5 +23,5 @@ exports.removeFolderRecursive = folderPath => {
         console.log(`Folder "${folderPath}" removed successfully`);
     }
 }
-exports.genres = ['rock', 'pop', 'hip-hop', 'jazz', 'blues', 'country', 'classical', 'electronic', 'reggae', 'folk', 'metal', 'punk', 'indie', ''];
-exports.instruments = ['guitar', 'piano', 'drums', 'bass', 'violin', 'saxophone', 'trumpet', 'flute', 'clarinet', 'keyboard', 'ukulele', 'banjo', 'harmonica', 'accordion', ''];
+exports.genres = ['rock', 'pop', 'hip-hop', 'jazz', 'blues', 'country', 'classical', 'electronic', 'reggae', 'folk', 'metal', 'punk', 'indie', 'other'];
+exports.instruments = ['guitar', 'piano', 'drums', 'bass', 'violin', 'saxophone', 'trumpet', 'flute', 'clarinet', 'keyboard', 'ukulele', 'banjo', 'harmonica', 'accordion', 'other'];

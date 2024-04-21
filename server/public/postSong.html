@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post</title>
+    <title>Post a song</title>
 </head>
 <body>
-    <p>Post a Cover or an original song</p>
-    <form action="/postSong" enctype="multipart/form-data" method="post" style="display: flex; flex-direction: column; justify-content: start; align-items: start;">
-        <p>Add a song</p>
-        <input type="file" required name="file">
-        <p></p>
-        <input required type="text" name="title" placeholder="Post title...">
+    <h2>Post a song</h2>
+    <form action="/postSong" method="post" enctype="multipart/form-data">
+        <input required type="text" name="title" placeholder="Title...">
+        <br>
+        <input type="file" name="mySong" required>
+        <br>
         <p>Select post type</p>
         <select required name="post_type">
             <option value="cover">Cover</option>
             <option value="original">Original Song</option>
         </select>
+        <br>
         <label for="genre">Select a genre of the music (optional - helps with the algorithm)</label>
-        <select name="genre" id="genre">
+        <select required name="genre" id="genre">
             <option value="rock">Rock</option>
             <option value="pop">Pop</option>
             <option value="hip-hop">Hip Hop</option>
@@ -34,8 +35,9 @@
             <option value="indie">Indie</option>
             <option value="other">Other</option>
         </select>
+        <br>
         <label for="instrument">Select the instrument you've used for the music (optional - helps with the algorithm)</label>
-        <select name="instrument">
+        <select required  name="instrument" id="instrument">
             <option value="guitar">Guitar</option>
             <option value="piano">Piano</option>
             <option value="drums">Drums</option>
@@ -52,8 +54,11 @@
             <option value="accordion">Accordion</option>
             <option value="other">Other</option>
         </select>
+        <br>
         <label for="description">Add the a description to your song/cover. For example the music sheet or anything you want</label>
+        <br>
         <textarea name="description" id="description" cols="30" rows="10"></textarea>
+        <br>
         <button type="submit">Submit</button>
     </form>
 </body>
