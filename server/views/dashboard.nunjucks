@@ -22,10 +22,16 @@
     <div style="display: flex; gap: 2rem; margin-bottom: 8px;">
         <a style="background-color: blue; color: white; border-radius: 5%;" href="/updateProfileReadme">Modify README</a>
         <a style="background-color: blue; color: white; border-radius: 5%;" href="/uploadProfilePicture">Modify Picture</a>
-        <a style="background-color: gold; color: white; border-radius: 5%;" href="/dashboard">Add Song to Profile</a>
+        <a style="background-color: gold; color: white; border-radius: 5%;" href="/uploadSongToProfile">Add Song to Profile</a>
     </div>
     <div style="display: flex; gap: 2rem; margin-bottom: 8px;">
         <a style="background-color: blue; color: white; border-radius: 5%;" href="/postSong">Post Song</a>
+        <a style="background-color: blue; color: white; border-radius: 5%;" href="/songs">View Songs</a>
+        <a style="background-color: red; color: white; border-radius: 5%;" href="/removeSong">Remove Song</a>
+    </div>
+    <div style="display: flex; gap: 2rem; margin-bottom: 8px;">
+        <a style="background-color: red; color: white; border-radius: 5%;" href="/removeUser">Remove User</a>
+        <a style="background-color: red; color: white; border-radius: 5%;" href="/deleteAccount">Delete Account</a>
     </div>
 
     <p><strong>README.md:</strong></p>

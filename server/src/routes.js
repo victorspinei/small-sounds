@@ -130,6 +130,8 @@ router.post('/login', (req, res) => {
             bcrypt.compare(password, rows[0].hash, (err, result)=> {
                 if (err) {
                     console.log('Error comparing passwords:', err.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
                 } else {
                     if (result) {
                         req.session.isLoggedIn = true;
@@ -384,8 +386,8 @@ router.post('/postSong', (req, res, next) => {
                         });
                         return;
                     } else {
-                        db.run('INSERT INTO posts (user_id, file_name, post_type, genre, instrument, description) VALUES (?, ?, ?, ?, ?, ?)', 
-                        [user[0].user_id, `/songs/${filename}`, type, genre || '', instrument || '', description || ''], (insertingError) => {
+                        db.run('INSERT INTO posts (user_id, file_name, post_type, genre, instrument, description, title) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                        [user[0].user_id, `/songs/${filename}`, type, genre || '', instrument || '', description || '', title], (insertingError) => {
                             if (insertingError) {
                                 console.error('Error inserting data:', insertingError.message);
                                 res.status(500).send('Internal Server Error');
@@ -408,6 +410,83 @@ router.post('/postSong', (req, res, next) => {
     } else {
         res.redirect('/login');
     }
-})
+});
+
+router.get('/removeSong', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        res.sendFile(path.join(__dirname, "../public", "removeSong.html"));
+    } else {
+        res.redirect('/login');
+    }
+});
+
+router.post('/removeSong', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        const username = req.session.username || req.cookies.username;
+        const title = req.body.title;
+        const password = req.body.password;
+        if (title === undefined || title === "") {
+            res.send("Title empty <br> <a href=\"/removeSong\">Go Back!</a>");
+            return;
+        }
+        if (password === undefined || password === "") {
+            res.send("Password empty <br> <a href=\"/removeSong\">Go Back!</a>");
+            return;
+        }
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectingError, user) => {
+            if (selectingError) {
+                console.error('Error selecting data:', selectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            // Check if any rows were returned
+            if (user.length === 0) {
+                res.send("Username not found<br> <a href=\"/dashboard\">Go Back!</a>");
+                return;
+            } else {
+                bcrypt.compare(password, user[0].hash, (comparingError, result)=> {
+                    if (comparingError) {
+                        console.log('Error comparing passwords:', comparingError.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    } else {
+                        if (result) {
+                            db.all('SELECT * FROM posts WHERE title = ? AND user_id = ?', [title, user[0].user_id], (postsSelectingError, posts) => {
+                                if (postsSelectingError) {
+                                    console.error('Error selecting data:', postsSelectingError.message);
+                                    res.status(500).send('Internal Server Error');
+                                    return;
+                                }
+                                if (posts.length === 0) {
+                                    res.send("Song not found<br> <a href=\"/removeSong\">Go Back!</a>");
+                                    return;
+                                } else {
+                                    db.run('DELETE FROM posts WHERE post_id = ?', post[0].post_id, (removingError) => {
+                                        if (removingError) {
+                                            console.error('Error removing data:', removingError.message);
+                                            res.status(500).send('Internal Server Error');
+                                            return;
+                                        } else {
+                                            fs.unlinkSync(path.join(__dirname, '../media/', posts[0].file_name));
+                                            console.log("File removed succesfuly!");
+                                            res.send("Song removed succesfully!<br> <a href=\"/dashboard\">Go to Dashboard!</a>");
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            res.send("Passwords do not match<br> <a href=\"/removeSong\">Go Back!</a>");
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+    } else {
+        res.redirect('/login');
+    }
+});
 
 module.exports = router;

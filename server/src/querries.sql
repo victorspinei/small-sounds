@@ -24,5 +24,7 @@ CREATE TABLE posts (
     genre TEXT CHECK (genre IN ('rock', 'pop', 'hip-hop', 'jazz', 'blues', 'country', 'classical', 'electronic', 'reggae', 'folk', 'metal', 'punk', 'indie', 'other')),
     instrument TEXT CHECK (instrument IN ('guitar', 'piano', 'drums', 'bass', 'violin', 'saxophone', 'trumpet', 'flute', 'clarinet', 'keyboard', 'ukulele', 'banjo', 'harmonica', 'accordion', 'other')),
     description TEXT,
+    posted_date TEXT,
+    title TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
