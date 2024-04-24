@@ -193,7 +193,7 @@ router.get('/dashboard', (req, res) => {
                 }
 
                 const song = profile[0].song ? profile[0].song : undefined;
-                const src = profile[0].picture || "/image/default_profile.png";
+                const src = profile[0].picture || "/images/default_profile.png";
                 const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
 
                 res.render('dashboard', {username: username, src: src, content: content});
@@ -487,6 +487,25 @@ router.post('/removeSong', (req, res) => {
     } else {
         res.redirect('/login');
     }
+});
+
+router.get('/songs', (req, res) => {
+    let songs = new Array();
+    db.all('SELECT * FROM posts LIMIT 50', (selectingError, posts) => {
+        if (selectingError) {
+            console.error('Error selecting data:', selectingError.message);
+            res.status(500).send('Internal Server Error');
+            return;
+        } 
+        for (let i = 0; i < posts.length; i++) {
+            songs.push({
+                title: posts[i].title,
+                src: posts[i].file_name
+            });
+        }
+
+        res.render('songs', {songs: songs});
+    });
 });
 
 module.exports = router;
