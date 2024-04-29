@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/styles/style.css">
+    <link rel="stylesheet" href="/styles/button.css">
+</head>
+<body>
+    <header>
+        {% block header %}
+            <img class="logo-img" src="/images/logo-placeholder.png" alt="Logo">
+            <nav>
+                <div class="links">
+                    <a class="under" href="/">Home</a>
+                    <a class="under" href="/">About</a>
+                    <a class="under" ref="/">Contact</a>
+                    <a class="under" ref="/">Pricing</a>
+                </div>
+                <a class="login-link under" href="/login">Log in</a>
+                <a class="signup-link btn-12" href="/signup"><span>Sign up</span></a>
+            </nav>
+        {% endblock %}
+    </header> 
+</body>
+</html>

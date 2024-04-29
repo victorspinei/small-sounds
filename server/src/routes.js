@@ -12,20 +12,49 @@ const db = require('./database');
 
 const router = express.Router();
 
+
 router.get('/', (req, res) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
-        res.redirect('/login');
+        res.render('landing');
         return;
-    }     
-    res.sendFile(path.join(__dirname, "../public", "index.html"));
-});
+    } else {
+        // User is logged in
+        const username = req.session.username || req.cookies.username;        
 
-router.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, "../public" ,"login.html"));
-});
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+            if (selectionError) {
+                console.error('Error selecting data:', selectionError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
 
-router.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, "../public", "signup.html"));
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectionError, profile) => {
+                if (profileSelectionError) {
+                    console.error('Error selecting data:', profileSelectionError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                const src = profile[0].picture || "/images/default_profile.png";
+
+                res.render('home', {username: username, src: src});
+            });
+        });
+    }
 });
 
 router.post('/signup', [
