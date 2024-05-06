@@ -12,15 +12,15 @@
 .btn-12 {
   -webkit-tap-highlight-color: transparent;
   -webkit-appearance: button;
-  background-color: #000;
+  background-color: var(--accent);
   background-image: none;
-  color: #fff;
+  color: var(--text);
   cursor: pointer;
   font-size: 10px;
   font-weight: 900;
   line-height: 1.5;
   margin: 0;
-  -webkit-mask-image: -webkit-radial-gradient(#000, #fff);
+  -webkit-mask-image: -webkit-radial-gradient(var(--text), var(--text));
   padding: 0;
   text-transform: uppercase;
 }
@@ -58,11 +58,11 @@
 .btn-12:before {
   background: linear-gradient(
     90deg,
-    #fff 25%,
+    var(--text) 25%,
     transparent 0,
     transparent 50%,
-    #fff 0,
-    #fff 75%,
+    var(--text) 0,
+    var(--text) 75%,
     transparent 0
   );
   content: "";
@@ -78,11 +78,11 @@
     90deg,
     transparent 0,
     transparent 25%,
-    #fff 0,
-    #fff 50%,
+    var(--text) 0,
+    var(--text) 50%,
     transparent 0,
     transparent 75%,
-    #fff 0
+    var(--text) 0
   );
   z-index: -1;
 }
@@ -103,7 +103,7 @@
 .under::after {
     content: "";
     height: 2px;
-    background: black;
+    background: var(--background);
     width: 0;
     position: absolute;
     top: 100%;

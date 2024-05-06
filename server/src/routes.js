@@ -15,11 +15,11 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
-        res.render('landing');
+        res.render('home', { loged: false });
         return;
     } else {
         // User is logged in
-        const username = req.session.username || req.cookies.username;        
+        const username = req.session.username || req.cookies.username;
 
         db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
             if (selectionError) {
@@ -51,10 +51,18 @@ router.get('/', (req, res) => {
 
                 const src = profile[0].picture || "/images/default_profile.png";
 
-                res.render('home', {username: username, src: src});
+                res.render('home', { username: username, src: src, loged: true });
             });
         });
     }
+});
+
+router.get('/signin', (req, res) => {
+    res.render('sign', { sign: "in" });
+});
+
+router.get('/signup', (req, res) => {
+    res.render('sign', { sign: "up" });
 });
 
 router.post('/signup', [
@@ -97,7 +105,7 @@ router.post('/signup', [
                 }
 
                 // Insert user into users table
-                db.run('INSERT INTO users (username, email, hash, joined) VALUES (?, ?, ?, ?)', [username, email, hash, (new Date()).toDateString()], function(err) {
+                db.run('INSERT INTO users (username, email, hash, joined) VALUES (?, ?, ?, ?)', [username, email, hash, (new Date()).toDateString()], function (err) {
                     if (err) {
                         console.error('Error inserting data into users table:', err.message);
                         res.status(500).send('Internal Server Error');
@@ -108,12 +116,12 @@ router.post('/signup', [
                     const user_id = this.lastID;
 
                     // Insert profile for the user
-                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "/images/default_profile.png"], function(err) {
+                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "/images/default_profile.png"], function (err) {
                         if (err) {
                             console.error('Error inserting data into profile table:', err.message);
                             res.status(500).send('Internal Server Error');
 
-                            db.run('DELETE FROM users WHERE user_id = ?', user_id, (deletionError)=> {
+                            db.run('DELETE FROM users WHERE user_id = ?', user_id, (deletionError) => {
                                 console.log(deletionError);
                             });
 
@@ -130,7 +138,7 @@ router.post('/signup', [
                             } else {
                                 const content = utils.GetContent(username);
                                 fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
-                                res.redirect('/login');
+                                res.redirect('/signup');
                             }
                         });
                     });
@@ -140,58 +148,88 @@ router.post('/signup', [
     });
 });
 
-router.post('/login', (req, res) => {
-    const username = req.body.username;
+router.post('/signin', (req, res) => {
+    const auth = req.body.username;
     const password = req.body.password;
 
-    db.all('SELECT * FROM users WHERE username = ?', username, (err, rows) => {
-        if (err) {
-            console.error('Error selecting data:', err.message);
-            res.status(500).send('Internal Server Error');
-            return;
-        }
+    // Check if input is an email or username
+    const field = utils.ValidateEmail(auth) ? "email" : "username";
 
-        // Check if any rows were returned
-        if (rows.length === 0) {
-            res.send("Username not found<br> <a href=\"/login\">Go Back!</a>");
-            return;
-        } else {
-            bcrypt.compare(password, rows[0].hash, (err, result)=> {
+    if (field == 'username') {
+        db.all('SELECT * FROM users WHERE username = ?', auth, (err, rows) => {
+            if (err) {
+                console.error('Error selecting data:', err.message);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            if (rows.length === 0) {
+                return res.send("User not found<br> <a href=\"/signin\">Go Back!</a>");
+            }
+
+            bcrypt.compare(password, rows[0].hash, (err, result) => {
                 if (err) {
-                    console.log('Error comparing passwords:', err.message);
-                    res.status(500).send('Internal Server Error');
-                    return;
+                    console.error('Error comparing passwords:', err.message);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                if (result) {
+                    req.session.isLoggedIn = true;
+                    req.session.username = rows[0].username;
+                    res.cookie('loggedIn', true, { httpOnly: true, secure: true });
+                    res.cookie('username', rows[0].username, { httpOnly: true, secure: true });
+                    return res.redirect('/');
                 } else {
-                    if (result) {
-                        req.session.isLoggedIn = true;
-                        req.session.username = username;
-                        res.cookie('loggedIn', true, {maxAge: 900000, httpOnly: true, secure: true });
-                        res.cookie('username', username, {maxAge: 900000, httpOnly: true, secure: true });
-                        res.redirect('/')
-                    } else {
-                        res.send("Passwords do not match<br> <a href=\"/login\">Go Back!</a>");
-                        return;
-                    }
+                    return res.send("Passwords do not match<br> <a href=\"/signin\">Go Back!</a>");
                 }
             });
-        }
-    });
+        });
+    } else {
+        db.all('SELECT * FROM users WHERE email = ?', auth, (err, rows) => {
+            if (err) {
+                console.error('Error selecting data:', err.message);
+                return res.status(500).send('Internal Server Error');
+            }
+            console.log(rows);
+
+            if (rows.length === 0) {
+                return res.send("User not found<br> <a href=\"/signin\">Go Back!</a>");
+            }
+
+            bcrypt.compare(password, rows[0].hash, (err, result) => {
+                if (err) {
+                    console.error('Error comparing passwords:', err.message);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                if (result) {
+                    req.session.isLoggedIn = true;
+                    req.session.username = rows[0].username;
+                    res.cookie('loggedIn', true, { maxAge: 900000, httpOnly: true, secure: true });
+                    res.cookie('username', rows[0].username, { maxAge: 900000, httpOnly: true, secure: true });
+                    return res.redirect('/');
+                } else {
+                    return res.send("Passwords do not match<br> <a href=\"/signin\">Go Back!</a>");
+                }
+            });
+        });
+    }
 });
 
-router.get('/logout', (req, res) => {
+
+router.get('/signout', (req, res) => {
     // Clear session
     req.session.destroy();
     // Clear login cookie
     res.clearCookie('loggedIn');
     res.clearCookie('username');
-    res.redirect('/login'); // Redirect to login page
+    res.redirect('/'); 
 });
 
 router.get('/dashboard', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         // User is logged in
         // Proceed with rendering the dashboard
-        const username = req.session.username || req.cookies.username;        
+        const username = req.session.username || req.cookies.username;
 
         db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
             if (err) {
@@ -225,7 +263,7 @@ router.get('/dashboard', (req, res) => {
                 const src = profile[0].picture || "/images/default_profile.png";
                 const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
 
-                res.render('dashboard', {username: username, src: src, content: content});
+                res.render('dashboard', { username: username, src: src, content: content });
             });
         });
 
@@ -236,25 +274,18 @@ router.get('/dashboard', (req, res) => {
     }
 });
 
-router.get('/uploadProfilePicture', (req, res) => {
+router.post('/uploadProfilePicture', (req, res, next) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
         res.redirect('/login');
         return;
-    }     
-    res.sendFile(path.join(__dirname, "../public", "picture.html"));
-});
-
-router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
-        res.redirect('/login');
-        return;
-    }     
-    const username = req.session.username || req.cookies.username;        
+    }
+    const username = req.session.username || req.cookies.username;
     uploadImage(req, res, (uploadingError) => {
         if (uploadingError) {
             console.error('Error uploading image:', uploadingError.message);
             res.status(500).send('Internal Server Error');
             return;
-        } 
+        }
         const filename = req.file.filename;
         db.all('SELECT * FROM users WHERE username = ?', username, (userError, user) => {
             if (userError) {
@@ -270,7 +301,7 @@ router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLo
                 }
 
                 if (profile[0].picture != "/images/default_profile.png") {
-                    fs.unlink(path.join(__dirname, "../media/", profile[0].picture), (unlinkingError)=> {
+                    fs.unlink(path.join(__dirname, "../media/", profile[0].picture), (unlinkingError) => {
                         if (unlinkingError) {
                             console.error('Error removing file:', unlinkingError);
                             return;
@@ -280,12 +311,12 @@ router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLo
                 }
 
             });
-            db.run('UPDATE profile SET picture = ? WHERE user_id = ?', [`/images/${filename}`, user[0].user_id], (updatingError)=> {
+            db.run('UPDATE profile SET picture = ? WHERE user_id = ?', [`/images/${filename}`, user[0].user_id], (updatingError) => {
                 if (updatingError) {
                     console.error('Error updating data into profile table:', updatingError.message);
                     res.status(500).send('Internal Server Error');
 
-                    fs.unlink(path.join(__dirname, "../media/images/", filename), (unlinkingError)=> {
+                    fs.unlink(path.join(__dirname, "../media/images/", filename), (unlinkingError) => {
                         if (unlinkingError) {
                             console.error('Error removing file:', unlinkingError);
                             return;
@@ -300,58 +331,10 @@ router.post('/uploadProfilePicture', (req, res, next) => { if (!req.session.isLo
         })
     });
 });
-
-router.get('/updateProfileReadme', (req, res) => {
-    if (req.session.isLoggedIn || req.cookies.loggedIn) {
-        // User is logged in
-        // Proceed with rendering the dashboard
-        const username = req.session.username || req.cookies.username;        
-
-        db.all('SELECT * FROM users WHERE username = ?', username, (err, user) => {
-            if (err) {
-                console.error('Error selecting data:', err.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-
-            if (user.length === 0) {
-                // User not found
-                console.error('User not found');
-                res.status(404).send('User not found');
-                return;
-            }
-
-            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (er, profile) => {
-                if (er) {
-                    console.error('Error selecting data:', er.message);
-                    res.status(500).send('Internal Server Error');
-                    return;
-                }
-
-                if (profile.length === 0) {
-                    // Profile not found
-                    console.error('Profile not found');
-                    res.status(404).send('Profile not found');
-                    return;
-                }
-
-                const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
-
-                res.render('markdown', { content: content });
-            });
-        });
-
-    } else {
-        // User is not logged in
-        // Redirect to login page or show an error message
-        res.redirect('/login');
-    }
-});
-
 router.post('/updateProfileReadme', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         const content = req.body.readme;
-        const username = req.session.username || req.cookies.username;        
+        const username = req.session.username || req.cookies.username;
         fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
         res.redirect('/dashboard');
     } else {
@@ -359,17 +342,10 @@ router.post('/updateProfileReadme', (req, res) => {
     }
 });
 
-router.get('/postSong', (req, res) => {
-    if (req.session.isLoggedIn || req.cookies.loggedIn) {
-        res.sendFile(path.join(__dirname, "../public", "postSong.html"));
-    } else {
-        res.redirect('/login');
-    }
-});
 
 router.post('/postSong', (req, res, next) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
-        const username = req.session.username || req.cookies.username;        
+        const username = req.session.username || req.cookies.username;
         uploadSong(req, res, (uploadingError) => {
             if (uploadingError) {
                 console.error('Error uploading image:', uploadingError.message);
@@ -406,7 +382,7 @@ router.post('/postSong', (req, res, next) => {
                     if (selectingError) {
                         console.error('Error selecting data:', selectingError.message);
                         res.status(500).send('Internal Server Error');
-                        fs.unlink(path.join(__dirname, "../media/songs/", filename), (unlinkingError)=> {
+                        fs.unlink(path.join(__dirname, "../media/songs/", filename), (unlinkingError) => {
                             if (unlinkingError) {
                                 console.error('Error removing file:', unlinkingError);
                                 return;
@@ -415,35 +391,27 @@ router.post('/postSong', (req, res, next) => {
                         });
                         return;
                     } else {
-                        db.run('INSERT INTO posts (user_id, file_name, post_type, genre, instrument, description, title) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                        [user[0].user_id, `/songs/${filename}`, type, genre || '', instrument || '', description || '', title], (insertingError) => {
-                            if (insertingError) {
-                                console.error('Error inserting data:', insertingError.message);
-                                res.status(500).send('Internal Server Error');
-                                fs.unlink(path.join(__dirname, "../media/songs/", filename), (unlinkingError)=> {
-                                    if (unlinkingError) {
-                                        console.error('Error removing file:', unlinkingError);
-                                        return;
-                                    }
-                                    console.log('File removed successfully');
-                                });
-                                return;
-                            } else {
-                                res.send("Song uploaded succesfully!<br> <a href=\"/dashboard\">Go to Dashboard!</a>");
-                            }
-                        })
+                        db.run('INSERT INTO posts (user_id, file_name, post_type, genre, instrument, description, title) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                            [user[0].user_id, `/songs/${filename}`, type, genre || '', instrument || '', description || '', title], (insertingError) => {
+                                if (insertingError) {
+                                    console.error('Error inserting data:', insertingError.message);
+                                    res.status(500).send('Internal Server Error');
+                                    fs.unlink(path.join(__dirname, "../media/songs/", filename), (unlinkingError) => {
+                                        if (unlinkingError) {
+                                            console.error('Error removing file:', unlinkingError);
+                                            return;
+                                        }
+                                        console.log('File removed successfully');
+                                    });
+                                    return;
+                                } else {
+                                    res.send("Song uploaded succesfully!<br> <a href=\"/dashboard\">Go to Dashboard!</a>");
+                                }
+                            })
                     }
                 });
             }
         });
-    } else {
-        res.redirect('/login');
-    }
-});
-
-router.get('/removeSong', (req, res) => {
-    if (req.session.isLoggedIn || req.cookies.loggedIn) {
-        res.sendFile(path.join(__dirname, "../public", "removeSong.html"));
     } else {
         res.redirect('/login');
     }
@@ -475,7 +443,7 @@ router.post('/removeSong', (req, res) => {
                 res.send("Username not found<br> <a href=\"/dashboard\">Go Back!</a>");
                 return;
             } else {
-                bcrypt.compare(password, user[0].hash, (comparingError, result)=> {
+                bcrypt.compare(password, user[0].hash, (comparingError, result) => {
                     if (comparingError) {
                         console.log('Error comparing passwords:', comparingError.message);
                         res.status(500).send('Internal Server Error');
@@ -516,25 +484,6 @@ router.post('/removeSong', (req, res) => {
     } else {
         res.redirect('/login');
     }
-});
-
-router.get('/songs', (req, res) => {
-    let songs = new Array();
-    db.all('SELECT * FROM posts LIMIT 50', (selectingError, posts) => {
-        if (selectingError) {
-            console.error('Error selecting data:', selectingError.message);
-            res.status(500).send('Internal Server Error');
-            return;
-        } 
-        for (let i = 0; i < posts.length; i++) {
-            songs.push({
-                title: posts[i].title,
-                src: posts[i].file_name
-            });
-        }
-
-        res.render('songs', {songs: songs});
-    });
 });
 
 module.exports = router;

@@ -1,1 +1,35 @@
 {% extends "base.html" %}
+
+{% block header %}
+    <header class="between">
+        <p class="logo fs-15"><a href="/"><span>S</span>mall<span>S</span>ounds</a></p>
+        <nav>
+            {% if loged %}
+                <button class="nav-btn" id="search-btn"><i title="search a song or an artist" class="fa-solid fa-magnifying-glass"></i></button>
+                <a class="nav-a" href="/postSong"><i title="post a song" class="fa-solid fa-plus"></i></a>
+                <a class="nav-a" href="/inbox"><i title="inbox" class="fa-solid fa-inbox"></i></a>
+                <button class="profile-picture" id="modal-open-btn"><img src="{{ src }}" alt="profile picture"></button>
+            {% else %}
+                <a class="login-link under" href="/signin">Sign in</a>
+                <a class="signup-link btn-12" href="/signup"><span>Sign up</span></a>
+            {% endif %}
+            <div class="modal-background">
+                <div class="modal-body">
+                    <div class="modal-row border-bottom">
+                        <div>
+                            <img src="{{ src }}" alt="profile picture">
+                            <p>{{ username }}</p>
+                        </div>
+                        <button id="modal-close-btn">&times;</button>
+                    </div>
+                    <div class="modal-row border-bottom">
+                        <a href="/profile/{{ username }}"><i class="fa-solid fa-user"></i> Profile</a>
+                    </div>
+                    <div class="modal-row">
+                        <a href="/signout"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header> 
+{% endblock %}

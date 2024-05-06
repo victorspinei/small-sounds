@@ -1,0 +1,78 @@
+header {
+  padding: 8px 1rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background-color: var(--background2);
+}
+
+.between {
+  justify-content: space-between;
+}
+.center {
+  justify-content: center;
+}
+
+header img {
+  height: 70px;
+}
+
+header .center {
+  justify-self: center;
+
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
+header nav .links {
+  margin-right: 4rem;
+}
+header nav .login-link {
+  margin-right: 1rem;
+}
+
+header nav a {
+  text-decoration: none;
+  color: var(--text);
+}
+
+header nav .links a {
+  margin-right: 6px;
+}
+
+.profile-picture {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.profile-picture img {
+  border-radius: 50%;
+  height: 40px;
+}
+
+nav .nav-btn, nav .nav-a  {
+  border: 2px solid var(--primary);
+  background: none;
+  color: var(--text);
+  height: 40px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  border-radius: 10%;
+  margin-right: 12px;
+  transition: color 150ms ease-in-out backgorund 150ms ease-in-out border 150ms ease-in-out;
+  cursor: pointer;
+}
+
+nav .nav-btn:hover, nav .nav-a:hover  {
+  color: var(--accent);
+  background: var(--secondary);
+  border: none;
+}

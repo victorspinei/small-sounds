@@ -10,39 +10,26 @@
 
 body {
   font-family: "Inter", sans-serif;
-  background-color: white;
-  color: black;
+  background: var(--background);
+  color: var(--text);
   line-height: 1.5;
+  min-height: 100vh;
 }
 
-header {
-  padding: 8px 1rem;
-  border-bottom: 1px solid rgb(197, 197, 197);
+:root {
+  --text: white;
+  --background: #222629;
+  --background2: #171a1c;
+  --primary: #6b6e70;
+  --secondary: #474b4f;
+  --accent: #86c232;
+  --accent2: #61892f;
 }
 
-header .logo-img {
-  height: 50px;
+.fs-3 {
+  font-size: 3rem;
 }
 
-header, header nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.fs-15 {
+  font-size: 1.5rem;
 }
-
-header nav .links {
-  margin-right: 4rem;
-}
-header nav .login-link {
-  margin-right: 1rem;
-}
-
-header nav a {
-  text-decoration: none;
-  color: black;
-}
-
-header nav .links a {
-  margin-right: 6px;
-}
-
