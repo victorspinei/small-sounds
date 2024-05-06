@@ -28,3 +28,64 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
+
+CREATE TABLE notifications (
+    notification_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    sender_id INTEGER NOT NULL,
+    notification_type TEXT NOT NULL,
+    target_id INTEGER,
+    is_read BOOLEAN DEFAULT 0,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (sender_id) REFERENCES users (user_id),
+    FOREIGN KEY (target_id) REFERENCES posts (post_id) 
+);
+
+CREATE TABLE comments (
+    comment_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (post_id) REFERENCES posts (post_id)
+);
+
+CREATE TABLE history (
+    history_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    action TEXT NOT NULL,
+    target_type TEXT NOT NULL, -- e.g., 'posts', 'users', etc.
+    target_id INTEGER NOT NULL, -- ID of the target entity
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id)
+);
+
+
+CREATE TABLE likes (
+    like_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (post_id) REFERENCES posts (post_id)
+);
+
+CREATE TABLE streams (
+    stream_id INTEGER PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL,
+    post_id INTEGER NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (post_id) REFERENCES posts (post_id)
+);
+
+CREATE TABLE followers (
+    follower_id INTEGER PRIMARY KEY NOT NULL,
+    follower_user_id INTEGER NOT NULL,
+    following_user_id INTEGER NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (follower_user_id) REFERENCES users (user_id),
+    FOREIGN KEY (following_user_id) REFERENCES users (user_id)
+);

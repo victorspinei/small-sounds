@@ -486,4 +486,9 @@ router.post('/removeSong', (req, res) => {
     }
 });
 
+router.get('/profile/:username', (req, res) => {
+    const profileUsername = req.params.username;
+    const username = req.session.username || req.cookies.username;
+});
+
 module.exports = router;
