@@ -1,0 +1,55 @@
+{% extends "header.nunjucks" %}
+
+{% block main %}
+<main>
+    <div>
+        {% if userAccount %}
+            <a href="/uploadProfilePicture?username={{ profileUsername }}"><img src="{{ profileSrc }}"></a>
+        {% else %}
+            <img src="{{ profileSrc }}">
+        {% endif %}
+        <p>{{ profileUsername }}</p>
+        {% if userAccount %} 
+            <a href="/{{profileUsername}}/posts">Manage Posts</a>
+        {% else %}
+            {% if isFollowing %}
+                <a href="/unFollow?username={{profileUsername}}">Unfollow</a>
+            {% else %}
+                <a href="/follow?username={{profileUsername}}">Follow</a>
+            {% endif %}
+        {% endif %}
+        <p><i class="fa-solid fa-people-group"></i> {{ followers }} Followers &#x2022; {{ following }} Following</p>
+    </div>
+    <div>
+        <div>
+            <div>
+                <p>{{ profileUsername }} /README.md</p>
+                {% if userAccount %}
+                    <a href="/updateProfileReadme?username={{ profileUsername }}"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
+                {% endif %} 
+            </div>
+            <md-block>{{ description }}</md-block>
+        </div>
+    </div>
+    {% if posts %}
+    <div>
+        <p>Posts:</p>
+        <ul>
+            {% for post in posts %}
+            <li>
+                <div>
+                    <p>{{ post.title }}</p>
+                    {{ post.likes }}
+                </div>
+                <p>{{ post.description }}</p>
+
+                <audio controls>
+                    <source src="{{ post.file_name }}" type="audio/mpeg">
+                </audio>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

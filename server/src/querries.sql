@@ -24,8 +24,9 @@ CREATE TABLE posts (
     genre TEXT CHECK (genre IN ('rock', 'pop', 'hip-hop', 'jazz', 'blues', 'country', 'classical', 'electronic', 'reggae', 'folk', 'metal', 'punk', 'indie', 'other')),
     instrument TEXT CHECK (instrument IN ('guitar', 'piano', 'drums', 'bass', 'violin', 'saxophone', 'trumpet', 'flute', 'clarinet', 'keyboard', 'ukulele', 'banjo', 'harmonica', 'accordion', 'other')),
     description TEXT,
-    posted_date TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     title TEXT NOT NULL,
+    likes INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 
@@ -52,17 +53,6 @@ CREATE TABLE comments (
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
 
-CREATE TABLE history (
-    history_id INTEGER PRIMARY KEY NOT NULL,
-    user_id INTEGER NOT NULL,
-    action TEXT NOT NULL,
-    target_type TEXT NOT NULL, -- e.g., 'posts', 'users', etc.
-    target_id INTEGER NOT NULL, -- ID of the target entity
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (user_id)
-);
-
-
 CREATE TABLE likes (
     like_id INTEGER PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
@@ -72,14 +62,15 @@ CREATE TABLE likes (
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
 
-CREATE TABLE streams (
-    stream_id INTEGER PRIMARY KEY NOT NULL,
+CREATE TABLE views (
+    view_id INTEGER PRIMARY KEY NOT NULL,
     user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
+
 
 CREATE TABLE followers (
     follower_id INTEGER PRIMARY KEY NOT NULL,

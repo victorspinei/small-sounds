@@ -15,7 +15,7 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
-        res.render('home', { loged: false });
+        res.render('home', { logged: false });
         return;
     } else {
         // User is logged in
@@ -51,7 +51,7 @@ router.get('/', (req, res) => {
 
                 const src = profile[0].picture || "/images/default_profile.png";
 
-                res.render('home', { username: username, src: src, loged: true });
+                res.render('home', { username: username, userSrc: src, logged: true });
             });
         });
     }
@@ -222,7 +222,7 @@ router.get('/signout', (req, res) => {
     // Clear login cookie
     res.clearCookie('loggedIn');
     res.clearCookie('username');
-    res.redirect('/'); 
+    res.redirect('/');
 });
 
 router.get('/dashboard', (req, res) => {
@@ -336,12 +336,11 @@ router.post('/updateProfileReadme', (req, res) => {
         const content = req.body.readme;
         const username = req.session.username || req.cookies.username;
         fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
-        res.redirect('/dashboard');
+        res.redirect(`/profile/${username}`);
     } else {
         res.redirect('/login');
     }
 });
-
 
 router.post('/postSong', (req, res, next) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
@@ -405,7 +404,7 @@ router.post('/postSong', (req, res, next) => {
                                     });
                                     return;
                                 } else {
-                                    res.send("Song uploaded succesfully!<br> <a href=\"/dashboard\">Go to Dashboard!</a>");
+                                    res.send("Song uploaded succesfully!<br> <a href=\"/\">Go Home!</a>");
                                 }
                             })
                     }
@@ -413,82 +412,140 @@ router.post('/postSong', (req, res, next) => {
             }
         });
     } else {
-        res.redirect('/login');
-    }
-});
-
-router.post('/removeSong', (req, res) => {
-    if (req.session.isLoggedIn || req.cookies.loggedIn) {
-        const username = req.session.username || req.cookies.username;
-        const title = req.body.title;
-        const password = req.body.password;
-        if (title === undefined || title === "") {
-            res.send("Title empty <br> <a href=\"/removeSong\">Go Back!</a>");
-            return;
-        }
-        if (password === undefined || password === "") {
-            res.send("Password empty <br> <a href=\"/removeSong\">Go Back!</a>");
-            return;
-        }
-
-        db.all('SELECT * FROM users WHERE username = ?', username, (selectingError, user) => {
-            if (selectingError) {
-                console.error('Error selecting data:', selectingError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-
-            // Check if any rows were returned
-            if (user.length === 0) {
-                res.send("Username not found<br> <a href=\"/dashboard\">Go Back!</a>");
-                return;
-            } else {
-                bcrypt.compare(password, user[0].hash, (comparingError, result) => {
-                    if (comparingError) {
-                        console.log('Error comparing passwords:', comparingError.message);
-                        res.status(500).send('Internal Server Error');
-                        return;
-                    } else {
-                        if (result) {
-                            db.all('SELECT * FROM posts WHERE title = ? AND user_id = ?', [title, user[0].user_id], (postsSelectingError, posts) => {
-                                if (postsSelectingError) {
-                                    console.error('Error selecting data:', postsSelectingError.message);
-                                    res.status(500).send('Internal Server Error');
-                                    return;
-                                }
-                                if (posts.length === 0) {
-                                    res.send("Song not found<br> <a href=\"/removeSong\">Go Back!</a>");
-                                    return;
-                                } else {
-                                    db.run('DELETE FROM posts WHERE post_id = ?', post[0].post_id, (removingError) => {
-                                        if (removingError) {
-                                            console.error('Error removing data:', removingError.message);
-                                            res.status(500).send('Internal Server Error');
-                                            return;
-                                        } else {
-                                            fs.unlinkSync(path.join(__dirname, '../media/', posts[0].file_name));
-                                            console.log("File removed succesfuly!");
-                                            res.send("Song removed succesfully!<br> <a href=\"/dashboard\">Go to Dashboard!</a>");
-                                        }
-                                    });
-                                }
-                            });
-                        } else {
-                            res.send("Passwords do not match<br> <a href=\"/removeSong\">Go Back!</a>");
-                            return;
-                        }
-                    }
-                });
-            }
-        });
-    } else {
-        res.redirect('/login');
+        res.redirect('/signin');
     }
 });
 
 router.get('/profile/:username', (req, res) => {
+    let logged;
+    let userSrc;
+    let userId;
+    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+        logged = false;
+    } else {
+        // User is logged in
+        const username = req.session.username || req.cookies.username;
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+            if (selectionError) {
+                console.error('Error selecting data:', selectionError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectionError, profile) => {
+                if (profileSelectionError) {
+                    console.error('Error selecting data:', profileSelectionError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                userSrc = profile[0].picture || "/images/default_profile.png";
+                logged = true;
+                userId = user[0].user_id;
+            });
+        });
+    }
     const profileUsername = req.params.username;
     const username = req.session.username || req.cookies.username;
+    const userAccount = username == profileUsername;
+    let isFollowing;
+
+    db.all('SELECT * FROM users WHERE username = ?', profileUsername, (selectingError, user) => {
+        if (selectingError) {
+            console.error('Error selecting data from users:', selectingError.message);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+
+        if (user.length === 0) {
+            res.status(404).send('User not found');
+            return;
+        }
+
+        let followers = 0;
+        let following = 0;
+
+        db.all('SELECT COUNT(*) AS count FROM followers WHERE following_user_id = ?', user[0].user_id, (followersSelectingError, rows) => {
+            if (followersSelectingError) {
+                console.error('Error selecting data from followers:', followersSelectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            followers = rows[0].count;
+        });
+
+        db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ?', user[0].user_id, (followersSelectingError, rows) => {
+            if (followersSelectingError) {
+                console.error('Error selecting data from followers:', followersSelectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            following = rows[0].count;
+        });
+
+        db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ? AND following_user_id = ?', [userId, user[0].user_id], (followersSelectingError, rows) => {
+            if (followersSelectingError) {
+                console.error('Error selecting data from followers:', followersSelectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            if (rows[0].count == 1) {
+                isFollowing = true;
+            } else {
+                isFollowing = false;
+            }
+        });
+
+        db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectingError, profile) => {
+            if (profileSelectingError) {
+                console.error('Error selecting data from profile:', profileSelectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            db.all('SELECT title, likes, description, timestamp, file_name FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
+                if (postSelectingError) {
+                    console.error('Error selecting data from posts:', postSelectingError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+                const profileSrc = profile[0].picture || "/images/default_profile.png";
+                const description = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
+                const song = profile[0].song;
+
+                res.render('profile', { 
+                    logged: logged,
+                    username: username,
+                    userSrc: userSrc,
+
+                    userAccount: userAccount, // if this is the viewer's acc
+                    isFollowing: isFollowing,
+                    profileUsername: profileUsername, 
+                    description: description, 
+                    profileSrc: profileSrc, 
+                    profileSong: song, 
+                    profilePosts: posts,
+                    followers: followers,
+                    following: following,
+                });
+            });
+        })
+    });
 });
 
 module.exports = router;

@@ -14,7 +14,8 @@ header {
 }
 
 header img {
-  height: 70px;
+  height: 40px;
+  width: 40px;
 }
 
 header .center {
@@ -52,7 +53,6 @@ header nav .links a {
 }
 .profile-picture img {
   border-radius: 50%;
-  height: 40px;
 }
 
 nav .nav-btn, nav .nav-a  {
