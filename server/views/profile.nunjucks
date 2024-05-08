@@ -1,55 +1,57 @@
 {% extends "header.nunjucks" %}
 
 {% block main %}
-<main>
-    <div>
+<main class="profile-main">
+    <section class="left-section">
         {% if userAccount %}
-            <a href="/uploadProfilePicture?username={{ profileUsername }}"><img src="{{ profileSrc }}"></a>
+            <a href="/uploadProfilePicture?username={{ profileUsername }}"><img class="profile-img" src="{{ profileSrc }}"></a>
         {% else %}
-            <img src="{{ profileSrc }}">
+            <img class="profile-img" src="{{ profileSrc }}">
         {% endif %}
-        <p>{{ profileUsername }}</p>
+        <p class="username">{{ profileUsername }}</p>
         {% if userAccount %} 
-            <a href="/{{profileUsername}}/posts">Manage Posts</a>
+            <a class="action-button" href="/{{profileUsername}}/posts">Manage Posts</a>
         {% else %}
             {% if isFollowing %}
-                <a href="/unFollow?username={{profileUsername}}">Unfollow</a>
+                <a class="action-button" href="/unFollow?username={{profileUsername}}">Unfollow</a>
             {% else %}
-                <a href="/follow?username={{profileUsername}}">Follow</a>
+                <a class="action-button" href="/follow?username={{profileUsername}}">Follow</a>
             {% endif %}
         {% endif %}
-        <p><i class="fa-solid fa-people-group"></i> {{ followers }} Followers &#x2022; {{ following }} Following</p>
-    </div>
-    <div>
-        <div>
-            <div>
-                <p>{{ profileUsername }} /README.md</p>
+        <p class="extra-info"><span class="text-color"><i class="fa-solid fa-people-group"></i> {{ followers }}</span> Followers &#x2022; <span class="text-color">{{ following }}</span> Following</p>
+    </section>
+    <section class="right-section">
+        <h2>Description:</h2>
+        <section class="description-section">
+            <div class="top-row">
+                <p>{{ profileUsername }}/README<span class="text-color-primary">.md</span></p>
                 {% if userAccount %}
                     <a href="/updateProfileReadme?username={{ profileUsername }}"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
                 {% endif %} 
             </div>
             <md-block>{{ description }}</md-block>
+        </section>
+        {% if posts %}
+        <div>
+            <h2>Most Popular Posts:</h2>
+            <section class="post-section">
+                {% for post in posts %}
+                    <div class="post">
+                        <div class="post-info">
+                            <div class="post-top">
+                                <p class="post-title">{{ post.title }}</p>
+                                <a class="like-btn" href="/posts?id={{ post.post_id }}"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></a>
+                            </div>
+                            <p class="post-description">{{ post.description }}</p>
+                        </div>
+                        <audio controls>
+                            <source src="{{ post.file_name }}" type="audio/mpeg">
+                        </audio>
+                    </div>
+                {% endfor %}
+            </section>
         </div>
-    </div>
-    {% if posts %}
-    <div>
-        <p>Posts:</p>
-        <ul>
-            {% for post in posts %}
-            <li>
-                <div>
-                    <p>{{ post.title }}</p>
-                    {{ post.likes }}
-                </div>
-                <p>{{ post.description }}</p>
-
-                <audio controls>
-                    <source src="{{ post.file_name }}" type="audio/mpeg">
-                </audio>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+        {% endif %}
+    </section>
 </main>
 {% endblock %}

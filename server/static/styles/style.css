@@ -7,6 +7,7 @@
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 body {
   font-family: "Inter", sans-serif;
@@ -24,6 +25,7 @@ body {
   --secondary: #474b4f;
   --accent: #86c232;
   --accent2: #61892f;
+  --red: #c23286;
 }
 
 .fs-3 {
@@ -32,4 +34,44 @@ body {
 
 .fs-15 {
   font-size: 1.5rem;
+}
+
+.text-color {
+  color: var(--text);
+}
+
+.text-color-primary {
+  color: var(--primary);
+}
+
+audio::-webkit-media-controls-panel,
+audio::-moz-media-controls-panel {
+  background-color: var(--background2);
+  /* Change background color */
+  color: var(--text);
+  /* Change text color */
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-moz-media-controls-play-button {
+  color: var(--text);
+  /* Change play button color */
+}
+
+audio::-webkit-media-controls-seek-back-button,
+audio::-webkit-media-controls-seek-forward-button,
+audio::-moz-media-controls-seek-back-button,
+audio::-moz-media-controls-seek-forward-button {
+  color: var(--text);
+  /* Change seek buttons color */
+}
+
+audio::-webkit-media-controls-play-button:hover,
+audio::-webkit-media-controls-seek-back-button:hover,
+audio::-webkit-media-controls-seek-forward-button:hover,
+audio::-moz-media-controls-play-button:hover,
+audio::-moz-media-controls-seek-back-button:hover,
+audio::-moz-media-controls-seek-forward-button:hover {
+  color: var(--accent);
+  /* Change button color on hover */
 }

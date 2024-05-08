@@ -1,0 +1,41 @@
+.post {
+    background-color: var(--background);
+    border: 2px solid var(--secondary);
+    border-radius: 5px;
+    position: relative;
+    padding-bottom: 2.5rem;
+}
+
+.post-info {
+    padding: 8px;
+
+}
+.post-description {
+    color: var(--primary);
+    font-size: 12px;
+}
+.post audio {
+    background-color: var(--background);
+    color: var(--accent);
+    border-radius: 0 0 5px 5px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+.post-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+}
+.post-title {
+    font-size: 14px;
+    font-weight: 700;
+}
+.like-btn {
+    color: var(--red);
+    text-decoration: none;
+    font-weight: 700;
+}
+.like-btn i {
+    margin-right: 5px;
+}

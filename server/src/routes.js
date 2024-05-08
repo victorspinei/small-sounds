@@ -61,6 +61,10 @@ router.get('/signin', (req, res) => {
     res.render('sign', { sign: "in" });
 });
 
+router.get('/postSong', (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/", "postSong.html"));
+});
+
 router.get('/signup', (req, res) => {
     res.render('sign', { sign: "up" });
 });
@@ -518,7 +522,7 @@ router.get('/profile/:username', (req, res) => {
                 return;
             }
 
-            db.all('SELECT title, likes, description, timestamp, file_name FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
+            db.all('SELECT * FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
                 if (postSelectingError) {
                     console.error('Error selecting data from posts:', postSelectingError.message);
                     res.status(500).send('Internal Server Error');
@@ -539,7 +543,7 @@ router.get('/profile/:username', (req, res) => {
                     description: description, 
                     profileSrc: profileSrc, 
                     profileSong: song, 
-                    profilePosts: posts,
+                    posts: posts,
                     followers: followers,
                     following: following,
                 });

@@ -5,6 +5,7 @@
     display: none;
     justify-content: right;
     align-items: top;
+    z-index: 10;
 }
 
 .modal-body {
@@ -16,6 +17,7 @@
     background-color: var(--background);
     border-radius: 5px 0 0 5px;
     padding: 0.5rem;
+    z-index: 11;
 }
 
 .modal-row {

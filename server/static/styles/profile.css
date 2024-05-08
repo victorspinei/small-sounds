@@ -1,0 +1,80 @@
+.profile-main {
+    display: flex;
+    gap: 5rem;
+    padding: 2rem;
+    justify-content: center;
+    
+}
+
+.profile-main .left-section .profile-img {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+}
+
+.left-section .username {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.left-section {
+    display: flex;
+    flex-direction: column;
+}
+.left-section .extra-info {
+    font-size: 14px;
+    color: var(--primary);
+
+}
+.action-button {
+    text-decoration: none;
+    color: var(--text);
+    border: 2px solid var(--secondary);
+    border-radius: 4px;
+    padding: 4px 8px;
+    width: 100%;
+    text-align: center;
+    transition: color 150ms ease-in-out backgorund 150ms ease-in-out border 150ms ease-in-out;
+    cursor: pointer;
+
+    font-weight: 500;
+    margin: 1rem 0;
+}
+.action-button:hover {
+  color: var(--accent);
+  background: var(--secondary);
+}
+.description-section {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    background-color: var(--background);
+    border: 2px solid var(--secondary);
+    border-radius: 6px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+.description-section md-block{
+    font-size: 12px;
+    position: relative;
+    left: 2rem;
+}
+.description-section .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.description-section .top-row a {
+    font-size: 1rem;
+    color: var(--text);
+}
+.profile-main h2 {
+    margin-bottom: .5rem;
+    text-align: start;
+    font-size: 1.25rem;
+}
+.post-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
