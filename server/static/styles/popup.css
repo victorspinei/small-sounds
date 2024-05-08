@@ -1,0 +1,13 @@
+.popup-background {
+    position: absolute;
+    background: hsla(0, 0%, 0%, 0.7);
+    inset: 0;
+    z-index: 10;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+.popup-background .popup-body {
+    z-index: 11;
+    background: var(--background);
+}

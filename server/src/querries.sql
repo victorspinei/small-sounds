@@ -27,6 +27,7 @@ CREATE TABLE posts (
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     title TEXT NOT NULL,
     likes INTEGER DEFAULT 0,
+    streams INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users (user_id)
 );
 

@@ -26,6 +26,7 @@ body {
   --accent: #86c232;
   --accent2: #61892f;
   --red: #c23286;
+  --yellow: #c2b632;
 }
 
 .fs-3 {
@@ -74,4 +75,8 @@ audio::-moz-media-controls-seek-back-button:hover,
 audio::-moz-media-controls-seek-forward-button:hover {
   color: var(--accent);
   /* Change button color on hover */
+}
+
+.flex-row {
+  display: flex;
 }

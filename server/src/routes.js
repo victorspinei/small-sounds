@@ -280,7 +280,7 @@ router.get('/dashboard', (req, res) => {
 
 router.post('/uploadProfilePicture', (req, res, next) => {
     if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
-        res.redirect('/login');
+        res.redirect('/signin');
         return;
     }
     const username = req.session.username || req.cookies.username;
@@ -310,7 +310,7 @@ router.post('/uploadProfilePicture', (req, res, next) => {
                             console.error('Error removing file:', unlinkingError);
                             return;
                         }
-                        console.log('File removed successfully');
+                        //console.log('File removed successfully');
                     });
                 }
 
@@ -330,7 +330,7 @@ router.post('/uploadProfilePicture', (req, res, next) => {
 
                     return;
                 }
-                res.redirect('/dashboard');
+                res.redirect(`/profile/${username}`);
             })
         })
     });
@@ -548,7 +548,7 @@ router.get('/profile/:username', (req, res) => {
                     following: following,
                 });
             });
-        })
+        });
     });
 });
 

@@ -4,7 +4,19 @@
 <main class="profile-main">
     <section class="left-section">
         {% if userAccount %}
-            <a href="/uploadProfilePicture?username={{ profileUsername }}"><img class="profile-img" src="{{ profileSrc }}"></a>
+            <button id="image-popup-open-btn" class="avatar" title="change profile picture" href="/uploadProfilePicture?username={{ profileUsername }}"><img class="profile-img" src="{{ profileSrc }}"></button>
+            <div class="popup-background">
+                <div class="popup-body">
+                    <form action="/uploadProfilePicture" method="post" enctype="multipart/form-data">
+                        <div class="flex-row">
+                            <label for="myPic">Upload an image</label>
+                            <button type="button" class="close-btn" id="popup-close-btn">&times;</button>
+                        </div>
+                        <input type="file" id="myPic" name="myPic">
+                        <button type="submit" class="submit-btn">Upload</button>
+                    </form>
+                </div>
+            </div>
         {% else %}
             <img class="profile-img" src="{{ profileSrc }}">
         {% endif %}
@@ -31,7 +43,7 @@
             </div>
             <md-block>{{ description }}</md-block>
         </section>
-        {% if posts %}
+        {% if posts.length != 0 %}
         <div>
             <h2>Most Popular Posts:</h2>
             <section class="post-section">
@@ -40,7 +52,8 @@
                         <div class="post-info">
                             <div class="post-top">
                                 <p class="post-title">{{ post.title }}</p>
-                                <a class="like-btn" href="/posts?id={{ post.post_id }}"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></a>
+                                <a title="likes" class="like-btn" href="/posts?id={{ post.post_id }}"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></a>
+                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i>{{ post.likes }}</p>
                             </div>
                             <p class="post-description">{{ post.description }}</p>
                         </div>

@@ -7,9 +7,29 @@
 }
 
 .profile-main .left-section .profile-img {
-    height: 200px;
-    width: 200px;
+    height: 250px;
+    width: 250px;
     border-radius: 50%;
+    margin-bottom: 1rem;
+}
+.avatar {
+    position: relative;
+}
+.avatar:hover::after {
+    display: block;
+}
+.avatar::after {
+    content: "change your avatar";
+    background-color: var(--secondary);
+    color: var(--accent);
+    border: 2px solid var(--primary);
+    position: absolute;
+    bottom: 0%;
+    left: 50%;
+    translate: -50%;
+    padding: 5px 8px;
+    white-space: nowrap;
+    display: none;
 }
 
 .left-section .username {
@@ -30,6 +50,7 @@
     text-decoration: none;
     color: var(--text);
     border: 2px solid var(--secondary);
+    background-color: var(--background);
     border-radius: 4px;
     padding: 4px 8px;
     width: 100%;
@@ -52,11 +73,13 @@
     border-radius: 6px;
     padding: 1rem 1.5rem;
     margin-bottom: 2rem;
+    padding-right: 2rem;
+    min-width: 325px;
 }
 .description-section md-block{
     font-size: 12px;
     position: relative;
-    left: 2rem;
+    left: 1.5rem;
 }
 .description-section .top-row {
     display: flex;
@@ -76,5 +99,11 @@
 .post-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: .1rem;
+}
+
+.left-section #image-popup-open-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
 }

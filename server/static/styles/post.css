@@ -28,7 +28,7 @@
     margin-bottom: .5rem;
 }
 .post-title {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
 }
 .like-btn {
@@ -36,6 +36,9 @@
     text-decoration: none;
     font-weight: 700;
 }
-.like-btn i {
-    margin-right: 5px;
+.streams {
+    color: var(--accent);
+}
+.like-btn i, .like-btn, .streams i {
+    margin-right: 3px;
 }
