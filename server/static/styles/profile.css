@@ -55,11 +55,10 @@
     padding: 4px 8px;
     width: 100%;
     text-align: center;
-    transition: color 150ms ease-in-out backgorund 150ms ease-in-out border 150ms ease-in-out;
+    transition: 150ms ease-in-out;
     cursor: pointer;
 
     font-weight: 500;
-    margin: 1rem 0;
 }
 .action-button:hover {
   color: var(--accent);

@@ -22,12 +22,12 @@
         {% endif %}
         <p class="username">{{ profileUsername }}</p>
         {% if userAccount %} 
-            <a class="action-button" href="/{{profileUsername}}/posts">Manage Posts</a>
+            <a class="action-button margin-16-0" href="/{{profileUsername}}/posts">Manage Posts</a>
         {% else %}
             {% if isFollowing == true %}
-                <button id="followButton" class="action-button" onclick="unFollowUser('{{profileUsername}}')">Unfollow</button>
+                <button id="followButton" class="action-button margin-16-0" onclick="unFollowUser('{{profileUsername}}')">Unfollow</button>
             {% else %}
-                <button id="followButton" class="action-button" onclick="followUser('{{profileUsername}}')">Follow</button>
+                <button id="followButton" class="action-button margin-16-0" onclick="followUser('{{profileUsername}}')">Follow</button>
             {% endif %}
         {% endif %}
         <p class="extra-info"><span class="text-color"><i class="fa-solid fa-people-group"></i> {{ followers }}</span> Followers &#x2022; <span class="text-color">{{ following }}</span> Following</p>
@@ -36,7 +36,7 @@
         <h2>Description:</h2>
         <section class="description-section">
             <div class="top-row">
-                <p>{{ profileUsername }}/README<span class="text-color-primary">.md</span></p>
+                <p>{{ profileUsername }}<span class="text-color-primary">/</span>README<span class="text-color-primary">.md</span></p>
                 {% if userAccount %}
                     <a href="/updateProfileReadme"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
                 {% endif %} 

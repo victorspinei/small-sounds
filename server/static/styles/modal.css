@@ -23,9 +23,9 @@
 .modal-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 1rem;
     padding-left: .5rem;
+    gap: 1rem;
 }
 .border-bottom {
     padding-bottom: 1rem;

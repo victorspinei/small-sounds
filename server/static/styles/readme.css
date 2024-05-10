@@ -1,0 +1,13 @@
+.readme-main form {
+    border: none;
+    background-color: var(--background);
+}
+.readme-main {
+    padding: 1rem;
+    min-height: 80vh;
+}
+.readme-main textarea {
+    padding: 1rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+}

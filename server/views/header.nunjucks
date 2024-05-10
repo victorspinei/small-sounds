@@ -15,15 +15,21 @@
             {% endif %}
             <div class="modal-background">
                 <div class="modal-body">
-                    <div class="modal-row border-bottom">
+                    <div class="modal-row border-bottom align-center">
                         <div>
                             <img src="{{ userSrc }}" alt="profile picture">
                             <p>{{ username }}</p>
                         </div>
                         <button class="close-btn" id="modal-close-btn">&times;</button>
                     </div>
-                    <div class="modal-row border-bottom">
-                        <a href="/profile/{{ username }}"><i class="fa-solid fa-user"></i> Profile</a>
+                    <div class="modal-row border-bottom flex-column align-start">
+                        <a href="/profile/{{ username }}"><i class="fa-solid fa-user"></i> Your Profile</a>
+                        <a href="/managePosts"><i class="fa-solid fa-upload"></i> Your Posts</a>
+                        <a href="/likedPosts"><i class="fa-solid fa-heart"></i> Liked Posts</a>
+                        <a href="/playlists"><i class="fa-solid fa-list"></i> Your Playlists</a>
+                    </div>
+                    <div class="modal-row border-bottom flex-column align-start">
+                        <a href="/profile/{{ username }}"><i class="fa-solid fa-people-group"></i> Following</a>
                     </div>
                     <div class="modal-row">
                         <a href="/signout"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>

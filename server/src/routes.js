@@ -574,7 +574,7 @@ router.get('/profile/:username', (req, res) => {
                             return;
                         }
 
-                        db.all('SELECT * FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
+                        db.all('SELECT * FROM posts WHERE user_id = ? ORDER BY likes DESC', user[0].user_id, (postSelectingError, posts) => {
                             if (postSelectingError) {
                                 console.error('Error selecting data from posts:', postSelectingError.message);
                                 res.status(500).send('Internal Server Error');

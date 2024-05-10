@@ -1,14 +1,16 @@
 {% extends "header.nunjucks" %}
 
 {% block main %}
+<main class="readme-main">
 <form action="/updateProfileReadme" method="post">
-    <section>
-        <p>{{ username }}/README<span>.md</spam></p>
-        <div>
-            <a href="/profile/{{ username }}">Cancel changes</a>
-            <button type="submit">Save changes</button>
-        </div>      
-        <textarea name="readme" id="readme" cols="30" rows="10">{{markdown}}</textarea>
-    </section>
+        <div class="modal-row justify-between align-center">
+            <p>{{ username }}<span class="text-color-primary">/</span>README<span class="text-color-primary">.md</spam></p>
+            <div>
+                <a class="action-button margin-right-8" href="/profile/{{ username }}">Cancel changes</a>
+                <button class="submit-btn" type="submit">Save changes</button>
+            </div>      
+        </div>
+        <textarea name="readme" id="readme"rows="30">{{markdown}}</textarea>
 </form>
+</main>
 {% endblock %}

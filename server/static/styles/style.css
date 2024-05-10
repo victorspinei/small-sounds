@@ -81,3 +81,19 @@ audio::-moz-media-controls-seek-forward-button:hover {
 .flex-row {
   display: flex;
 }
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.align-center {
+  align-items: center;
+}
+.align-start {
+  align-items: start;
+}
+.margin-right-8 {
+  margin-right: 8px;
+}
+.margin-16-0 {
+  margin: 1rem 0;
+}

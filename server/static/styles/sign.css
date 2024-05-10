@@ -25,7 +25,7 @@ h2 {
 }
 
 form {
-    width: 350px;
+    min-width: 350px;
     height: auto;
     border-radius: 10px;
     border: 2px solid var(--primary);
@@ -56,12 +56,18 @@ form div {
 }
 .submit-btn {
     background-color: var(--accent);
-    border: none;
+    border: 1px solid var(--accent);
     color: var(--text);
     padding: 6px;
     font-weight: 700;
-    border-radius: 6px;
+    border-radius: 3px;
     cursor: pointer;
+    white-space: nowrap;
+    transition: 150ms ease-in-out;
+}
+.submit-btn:hover {
+    border-color: var(--accent2);
+    background-color: var(--accent2);
 }
 .sign-div {
     font-size: 14px;
