@@ -40,5 +40,8 @@
     color: var(--accent);
 }
 .like-btn i, .like-btn, .streams i {
-    margin-right: 3px;
+    margin-right: 1px;
+}
+.like-btn i, .like-btn, .streams i, .streams {
+    font-size: 12px;
 }

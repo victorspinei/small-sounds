@@ -120,7 +120,7 @@ router.post('/signup', [
                     const user_id = this.lastID;
 
                     // Insert profile for the user
-                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, `../media/users/${username}/README.md`, "/images/default_profile.png"], function (err) {
+                    db.run('INSERT INTO profile (user_id, markdown, picture) VALUES (?, ?, ?)', [user_id, utils.GetContent(username), "/images/default_profile.png"], function (err) {
                         if (err) {
                             console.error('Error inserting data into profile table:', err.message);
                             res.status(500).send('Internal Server Error');
@@ -131,20 +131,7 @@ router.post('/signup', [
 
                             return;
                         }
-
-                        // Create user directory and README file
-                        fs.mkdir(path.join(__dirname, `../media/users/${username}`), (error) => {
-                            if (error) {
-                                console.error('Error creating directory:', error.message);
-                                res.status(500).send('Internal Server Error');
-                                utils.removeFolderRecursive(path.join(__dirname, `../media/users/${username}`));
-                                return;
-                            } else {
-                                const content = utils.GetContent(username);
-                                fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
-                                res.redirect('/signup');
-                            }
-                        });
+                        res.redirect('/signin');
                     });
                 });
             });
@@ -265,7 +252,7 @@ router.get('/dashboard', (req, res) => {
 
                 const song = profile[0].song ? profile[0].song : undefined;
                 const src = profile[0].picture || "/images/default_profile.png";
-                const content = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
+                const content = profile[0].markdown;
 
                 res.render('dashboard', { username: username, src: src, content: content });
             });
@@ -335,16 +322,87 @@ router.post('/uploadProfilePicture', (req, res, next) => {
         })
     });
 });
+
+router.get('/updateProfileReadme', (req, res) => {
+    if (!req.session.isLoggedIn && !req.cookies.loggedIn) {
+        res.redirect('/signin');
+        return;
+    } else {
+        const username = req.session.username || req.cookies.username;
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+            if (selectionError) {
+                console.error('Error selecting data:', selectionError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectionError, profile) => {
+                if (profileSelectionError) {
+                    console.error('Error selecting data:', profileSelectionError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                const src = profile[0].picture || "/images/default_profile.png";
+                const markdown = profile[0].markdown;
+
+                res.render('readme', { username: username, userSrc: src, logged: true, markdown: markdown });
+            });
+        });
+    }
+});
+
 router.post('/updateProfileReadme', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         const content = req.body.readme;
         const username = req.session.username || req.cookies.username;
-        fs.writeFileSync(path.join(__dirname, `../media/users/${username}/README.md`), content);
-        res.redirect(`/profile/${username}`);
+        
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+            if (selectionError) {
+                console.error('Error selecting data:', selectionError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.run("UPDATE profile SET markdown = ? WHERE user_id = ?", [content, user[0].user_id], updateError => {
+                if (updateError) {
+                    console.error('Error updating profile readme:', updateError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                // Redirect to the user's profile page after updating the readme
+                res.redirect(`/profile/${username}`);
+            });
+        });
     } else {
-        res.redirect('/login');
+        // Redirect to the sign-in page if not logged in
+        res.redirect('/signin');
     }
 });
+
 
 router.post('/postSong', (req, res, next) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
@@ -491,65 +549,183 @@ router.get('/profile/:username', (req, res) => {
                 return;
             }
             followers = rows[0].count;
-        });
-
-        db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ?', user[0].user_id, (followersSelectingError, rows) => {
-            if (followersSelectingError) {
-                console.error('Error selecting data from followers:', followersSelectingError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-            following = rows[0].count;
-        });
-
-        db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ? AND following_user_id = ?', [userId, user[0].user_id], (followersSelectingError, rows) => {
-            if (followersSelectingError) {
-                console.error('Error selecting data from followers:', followersSelectingError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-            if (rows[0].count == 1) {
-                isFollowing = true;
-            } else {
-                isFollowing = false;
-            }
-        });
-
-        db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectingError, profile) => {
-            if (profileSelectingError) {
-                console.error('Error selecting data from profile:', profileSelectingError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-
-            db.all('SELECT * FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
-                if (postSelectingError) {
-                    console.error('Error selecting data from posts:', postSelectingError.message);
+            db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ?', user[0].user_id, (followersSelectingError, rows) => {
+                if (followersSelectingError) {
+                    console.error('Error selecting data from followers:', followersSelectingError.message);
                     res.status(500).send('Internal Server Error');
                     return;
                 }
-                const profileSrc = profile[0].picture || "/images/default_profile.png";
-                const description = fs.readFileSync(path.join(__dirname, profile[0].markdown), 'utf-8');
-                const song = profile[0].song;
+                following = rows[0].count;
+                db.all('SELECT COUNT(*) AS count FROM followers WHERE follower_user_id = ? AND following_user_id = ?', [userId, user[0].user_id], (followersSelectingError, rows) => {
+                    if (followersSelectingError) {
+                        console.error('Error selecting data from followers:', followersSelectingError.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+                    if (rows[0].count == 1) {
+                        isFollowing = true;
+                    } else {
+                        isFollowing = false;
+                    }
+                    db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectingError, profile) => {
+                        if (profileSelectingError) {
+                            console.error('Error selecting data from profile:', profileSelectingError.message);
+                            res.status(500).send('Internal Server Error');
+                            return;
+                        }
 
-                res.render('profile', { 
-                    logged: logged,
-                    username: username,
-                    userSrc: userSrc,
+                        db.all('SELECT * FROM posts WHERE user_id = ? ORDER BY likes DESC LIMIT 10', user[0].user_id, (postSelectingError, posts) => {
+                            if (postSelectingError) {
+                                console.error('Error selecting data from posts:', postSelectingError.message);
+                                res.status(500).send('Internal Server Error');
+                                return;
+                            }
+                            const profileSrc = profile[0].picture || "/images/default_profile.png";
+                            const description = profile[0].markdown;
+                            const song = profile[0].song;
 
-                    userAccount: userAccount, // if this is the viewer's acc
-                    isFollowing: isFollowing,
-                    profileUsername: profileUsername, 
-                    description: description, 
-                    profileSrc: profileSrc, 
-                    profileSong: song, 
-                    posts: posts,
-                    followers: followers,
-                    following: following,
+                            res.render('profile', { 
+                                logged: logged,
+                                username: username,
+                                userSrc: userSrc,
+
+                                userAccount: userAccount, // if this is the viewer's acc
+                                isFollowing: isFollowing,
+                                profileUsername: profileUsername, 
+                                description: description, 
+                                profileSrc: profileSrc, 
+                                profileSong: song, 
+                                posts: posts,
+                                followers: followers,
+                                following: following,
+                            });
+                        });
+                    });
                 });
             });
         });
     });
 });
+
+router.post('/like', (req, res) => {
+    const postId = req.query.id;
+    const username = req.session.username || req.cookies.username;
+    
+    db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+        if (selectionError) {
+            console.error('Error selecting data:', selectionError.message);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+
+        if (user.length === 0) {
+            // User not found
+            console.error('User not found');
+            res.status(404).send('User not found');
+            return;
+        }
+
+        db.run('INSERT INTO likes (user_id, post_id) VALUES (?, ?)', [user[0].user_id, postId], function (err) {
+            if (err) {
+                console.error('Error inserting data into profile table:', err.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            // After inserting the like, retrieve the count of likes for the post
+            db.all('SELECT COUNT(*) AS count FROM likes WHERE post_id = ?', postId, (likesSelectingError, rows) => {
+                if (likesSelectingError) {
+                    console.error('Error selecting data from likes:', likesSelectingError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                const likes = rows[0].count;
+
+                // Update the likes count for the post
+                db.run("UPDATE posts SET likes = ? WHERE post_id = ?", [likes, postId], updateErr => {
+                    if (updateErr) {
+                        console.error('Error updating likes count:', updateErr.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+
+                    res.status(200).send(`Likes updated for post with ID ${postId}`);
+                });
+            });
+        });
+    });
+});
+
+router.post('/follow', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        const followerUsername = req.session.username || req.cookies.username;
+        const followingUsername = req.body.username;
+        db.get('SELECT * FROM users WHERE username = ?', followerUsername, (selectingError, followerUser) => {
+            if (selectingError) {
+                console.error('Error selecting follower id:', selectingError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            const followerId = followerUser.user_id;
+            db.get('SELECT * FROM users WHERE username = ?', followingUsername, (selectingError2, followingUser) => {
+                if (selectingError2) {
+                    console.error('Errof selecting following id:', selectingError2.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+                const followingId = followingUser.user_id;
+                db.run('INSERT INTO followers (follower_user_id, following_user_id) VALUES (?, ?)', [followerId, followingId], (insertingError) => {
+                    if (insertingError) {
+                        console.error('Error inserting data into followers table:', insertingError.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+                    res.status(200).send("User followed successfully");
+                })
+            });
+        });
+    } else {
+        res.redirect('/signin');
+    }
+});
+
+router.post('/unFollow', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        const followerUsername = req.session.username || req.cookies.username;
+        const followingUsername = req.body.username;
+
+        // Check if followerUsername and followingUsername exist in the database
+        db.get('SELECT user_id FROM users WHERE username = ?', followerUsername, (selectingError1, followerUser) => {
+            if (selectingError1 || !followerUser) {
+                console.error('Error selecting follower id:', selectingError1 ? selectingError1.message : 'User not found');
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+            const followerId = followerUser.user_id;
+
+            db.get('SELECT user_id FROM users WHERE username = ?', followingUsername, (selectingError2, followingUser) => {
+                if (selectingError2 || !followingUser) {
+                    console.error('Error selecting following id:', selectingError2 ? selectingError2.message : 'User not found');
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+                const followingId = followingUser.user_id;
+
+                db.run('DELETE FROM followers WHERE follower_user_id = ? AND following_user_id = ?', [followerId, followingId], (deletionError) => {
+                    if (deletionError) {
+                        console.error('Error deleting data from followers table:', deletionError.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+                    res.status(200).send('User unfollowed successfully');
+                });
+            });
+        });
+    } else {
+        res.redirect('/signin');
+    }
+});
+
 
 module.exports = router;

@@ -7,7 +7,8 @@ exports.ValidateEmail = email => {
     return email.match(validRegex);
 }
 
-exports.GetContent = username => `-👋 Hi, I’m @${username}\n-👀 I’m interested in ...\n-🌱 I’m currently learning ...\n-💞️ I’m looking to collaborate on ...\n-📫 How to reach me ...\n`;
+exports.GetContent = username => `- 👋 Hi, I’m @${username}`;
+
 
 exports.removeFolderRecursive = folderPath => {
     if (fs.existsSync(folderPath)) {

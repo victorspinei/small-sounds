@@ -4,7 +4,7 @@
 <main class="profile-main">
     <section class="left-section">
         {% if userAccount %}
-            <button id="image-popup-open-btn" class="avatar" title="change profile picture" href="/uploadProfilePicture?username={{ profileUsername }}"><img class="profile-img" src="{{ profileSrc }}"></button>
+            <button id="image-popup-open-btn" class="avatar" title="change profile picture"><img class="profile-img" src="{{ profileSrc }}"></button>
             <div class="popup-background">
                 <div class="popup-body">
                     <form action="/uploadProfilePicture" method="post" enctype="multipart/form-data">
@@ -24,10 +24,10 @@
         {% if userAccount %} 
             <a class="action-button" href="/{{profileUsername}}/posts">Manage Posts</a>
         {% else %}
-            {% if isFollowing %}
-                <a class="action-button" href="/unFollow?username={{profileUsername}}">Unfollow</a>
+            {% if isFollowing == true %}
+                <button id="followButton" class="action-button" onclick="unFollowUser('{{profileUsername}}')">Unfollow</button>
             {% else %}
-                <a class="action-button" href="/follow?username={{profileUsername}}">Follow</a>
+                <button id="followButton" class="action-button" onclick="followUser('{{profileUsername}}')">Follow</button>
             {% endif %}
         {% endif %}
         <p class="extra-info"><span class="text-color"><i class="fa-solid fa-people-group"></i> {{ followers }}</span> Followers &#x2022; <span class="text-color">{{ following }}</span> Following</p>
@@ -38,7 +38,7 @@
             <div class="top-row">
                 <p>{{ profileUsername }}/README<span class="text-color-primary">.md</span></p>
                 {% if userAccount %}
-                    <a href="/updateProfileReadme?username={{ profileUsername }}"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
+                    <a href="/updateProfileReadme"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
                 {% endif %} 
             </div>
             <md-block>{{ description }}</md-block>
@@ -52,7 +52,7 @@
                         <div class="post-info">
                             <div class="post-top">
                                 <p class="post-title">{{ post.title }}</p>
-                                <a title="likes" class="like-btn" href="/posts?id={{ post.post_id }}"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></a>
+                                <p title="likes" class="like-btn"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></p>
                                 <p title="streams" class="streams" ><i class="fa-solid fa-music"></i>{{ post.likes }}</p>
                             </div>
                             <p class="post-description">{{ post.description }}</p>
@@ -67,4 +67,12 @@
         {% endif %}
     </section>
 </main>
+{% endblock %}
+
+{% block script %}
+    {% if userAccount %}
+        <script src="/scripts/popup.js"></script>
+    {% else %}
+        <script src="/scripts/follow.js"></script>
+    {% endif %}
 {% endblock %}

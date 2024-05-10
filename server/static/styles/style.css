@@ -18,6 +18,7 @@ body {
 }
 
 :root {
+  color-scheme: dark;
   --text: white;
   --background: #222629;
   --background2: #171a1c;

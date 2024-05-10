@@ -65,7 +65,7 @@ nav .nav-btn, nav .nav-a  {
   justify-content: center;
   align-items: center;
   padding: 8px;
-  border-radius: 10%;
+  border-radius: 50%;
   margin-right: 12px;
   transition: color 150ms ease-in-out backgorund 150ms ease-in-out border 150ms ease-in-out;
   cursor: pointer;
