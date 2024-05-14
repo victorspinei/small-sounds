@@ -36,6 +36,12 @@
     text-decoration: none;
     font-weight: 700;
 }
+.edit-btn {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+}
 .streams {
     color: var(--accent);
 }

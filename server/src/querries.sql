@@ -65,10 +65,8 @@ CREATE TABLE likes (
 
 CREATE TABLE views (
     view_id INTEGER PRIMARY KEY NOT NULL,
-    user_id INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (user_id),
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
 );
 

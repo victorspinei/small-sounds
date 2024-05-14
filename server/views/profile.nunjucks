@@ -22,7 +22,6 @@
         {% endif %}
         <p class="username">{{ profileUsername }}</p>
         {% if userAccount %} 
-            <a class="action-button margin-16-0" href="/{{profileUsername}}/posts">Manage Posts</a>
         {% else %}
             {% if isFollowing == true %}
                 <button id="followButton" class="action-button margin-16-0" onclick="unFollowUser('{{profileUsername}}')">Unfollow</button>
@@ -52,10 +51,14 @@
                         <div class="post-info">
                             <div class="post-top">
                                 <p class="post-title">{{ post.title }}</p>
-                                <p title="likes" class="like-btn"><i class="fa-solid fa-heart"></i><span class="likes">{{ post.likes }}</span></p>
-                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i>{{ post.likes }}</p>
+                                <p title="likes" class="like-btn"><i class="fa-solid fa-heart"></i><span class="likes-count">{{ post.likes }}</span></p>
+                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i><span class="streams-count">{{ post.likes }}</span></p>
+                                {% if userAccount %}
+                                    <a href="/edit/post?post_id={{post.post_id}}" title="edit" class="edit-btn"><i class="fa-solid fa-pencil"></i></a>
+                                {% endif %}
                             </div>
                             <p class="post-description">{{ post.description }}</p>
+                            <p style="display: none;" class="post_id">{{ post.post_id }}</p>
                         </div>
                         <audio controls>
                             <source src="{{ post.file_name }}" type="audio/mpeg">
@@ -74,5 +77,6 @@
         <script src="/scripts/popup.js"></script>
     {% else %}
         <script src="/scripts/follow.js"></script>
+        <script src="/scripts/streams.js"></script>
     {% endif %}
 {% endblock %}
