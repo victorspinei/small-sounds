@@ -802,4 +802,54 @@ router.get('/following', (req, res) => {
     }
 });
 
+router.get('/likedPosts', (req, res) => {
+    if (req.session.isLoggedIn || req.cookies.loggedIn) {
+        const username = req.session.username || req.cookies.username;
+
+        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+            if (selectionError) {
+                console.error('Error selecting data:', selectionError.message);
+                res.status(500).send('Internal Server Error');
+                return;
+            }
+
+            if (user.length === 0) {
+                // User not found
+                console.error('User not found');
+                res.status(404).send('User not found');
+                return;
+            }
+
+            db.all('SELECT * FROM profile WHERE user_id = ?', user[0].user_id, (profileSelectionError, profile) => {
+                if (profileSelectionError) {
+                    console.error('Error selecting data:', profileSelectionError.message);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                if (profile.length === 0) {
+                    // Profile not found
+                    console.error('Profile not found');
+                    res.status(404).send('Profile not found');
+                    return;
+                }
+
+                const src = profile[0].picture || "/images/default_profile.png";
+
+                db.all('SELECT * FROM likes JOIN posts ON likes.post_id = posts.post_id WHERE likes.user_id = ?;', user[0].user_id, (likesSelectingError, data) => {
+                    if (likesSelectingError) {
+                        console.error('Error selecting data from likes:', likesSelectingError.message);
+                        res.status(500).send('Internal Server Error');
+                        return;
+                    }
+
+                    res.render('likedPosts', { username: username, userSrc: src, logged: true, posts: data });
+                });
+            });
+        });
+    } else {
+        res.redirect('/signin')
+    }
+});
+
 module.exports = router;
