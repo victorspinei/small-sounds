@@ -732,6 +732,7 @@ router.post('/recordSongView', (req, res) => {
                         }
 
                         const views = rows[0].count;
+                        console.log(views);
 
                         // Update the likes count for the post
                         db.run("UPDATE posts SET streams = ? WHERE post_id = ?", [views, postId], updateErr => {

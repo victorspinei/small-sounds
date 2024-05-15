@@ -81,6 +81,9 @@ audio::-moz-media-controls-seek-forward-button:hover {
 .flex-row {
   display: flex;
 }
+.mb-8 {
+  margin-bottom: 8px;
+}
 .flex-column {
   display: flex;
   flex-direction: column;

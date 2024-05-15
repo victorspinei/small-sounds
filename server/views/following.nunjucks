@@ -2,6 +2,21 @@
 
 {% block main %}
 <main>
-    TODO: Following
+    {% for profile in following %}
+        <a href="/profile/{{ profile.username }}" class="following-profile mb-8">
+            <div class="circle-container">
+                <img src="{{ profile.picture }}" alt="{{ profile.username }}'s profile picture">
+            </div>
+            <div>
+                <p>{{ profile.username }}</p>
+                <p class="text-color-primary following-markdown">{{ profile.markdown }}</p>
+            </div>
+            <button class="unfollow-button action-button">Unfollow</button>
+        </a>
+    {% endfor %}
 </main>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/scripts/following.js"></script>
 {% endblock %}

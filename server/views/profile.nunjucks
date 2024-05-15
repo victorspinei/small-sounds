@@ -52,7 +52,7 @@
                             <div class="post-top">
                                 <p class="post-title">{{ post.title }}</p>
                                 <p title="likes" class="like-btn"><i class="fa-solid fa-heart"></i><span class="likes-count">{{ post.likes }}</span></p>
-                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i><span class="streams-count">{{ post.likes }}</span></p>
+                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i><span class="streams-count">{{ post.streams }}</span></p>
                                 {% if userAccount %}
                                     <a href="/edit/post?post_id={{post.post_id}}" title="edit" class="edit-btn"><i class="fa-solid fa-pencil"></i></a>
                                 {% endif %}

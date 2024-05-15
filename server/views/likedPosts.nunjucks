@@ -1,0 +1,7 @@
+{% extends "header.nunjucks" %}
+
+{% block main %}
+<main>
+    todo: liked posts
+</main>
+{% endblock %}
