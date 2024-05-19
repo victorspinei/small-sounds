@@ -11,18 +11,20 @@
                 <button class="nav-btn" id="search-btn">
                     <i title="search a song or an artist" class="fa-solid fa-magnifying-glass"></i>
                 </button>
-                <button class="nav-a" >
+                <button class="nav-a" id="popup-open-btn-post">
                     <i title="post a song" class="fa-solid fa-plus"></i>
                 </button>
                 <a class="nav-a" href="/inbox">
                     <i title="inbox" class="fa-solid fa-inbox"></i>
                 </a>
-                <button class="profile-picture" id="modal-open-btn"><img src="{{ userSrc }}" alt="profile picture"></button>
+                <button class="profile-picture circle-container one-by-one h-40" id="modal-open-btn"><img src="{{ userSrc }}" alt="profile picture"></button>
                 <div class="modal-background">
                     <div class="modal-body">
                         <div class="modal-row border-bottom align-center">
                             <div>
-                                <img src="{{ userSrc }}" alt="profile picture">
+                                <div class="one-by-one circle-container">
+                                    <img src="{{ userSrc }}" alt="profile picture">
+                                </div>
                                 <p>{{ username }}</p>
                             </div>
                             <button class="close-btn" id="modal-close-btn">&times;</button>
@@ -45,6 +47,66 @@
                         </div>
                     </div>
                 </div>
+                <div class="popup-background-post">
+                    <div class="popup-body-post">
+                        <h2>Post a song</h2>
+                        <button type="button" class="close-btn" id="popup-close-btn-post">&times;</button>
+                        <form action="/postSong" method="post" enctype="multipart/form-data">
+                            <input required type="text" name="title" placeholder="Title...">
+                            <br>
+                            <input type="file" name="mySong" required>
+                            <br>
+                            <p>Select post type</p>
+                            <select required name="post_type">
+                                <option value="cover">Cover</option>
+                                <option value="original">Original Song</option>
+                            </select>
+                            <br>
+                            <label for="genre">Select a genre of the music (optional)</label>
+                            <select required name="genre" id="genre">
+                                <option value="other">Other</option>
+                                <option value="rock">Rock</option>
+                                <option value="pop">Pop</option>
+                                <option value="hip-hop">Hip Hop</option>
+                                <option value="jazz">Jazz</option>
+                                <option value="blues">Blues</option>
+                                <option value="country">Country</option>
+                                <option value="classical">Classical</option>
+                                <option value="electronic">Electronic</option>
+                                <option value="reggae">Reggae</option>
+                                <option value="folk">Folk</option>
+                                <option value="metal">Metal</option>
+                                <option value="punk">Punk</option>
+                                <option value="indie">Indie</option>
+                            </select>
+                            <br>
+                            <label for="instrument">Select the instrument you've used for the music (optional)</label>
+                            <select required  name="instrument" id="instrument">
+                                <option value="other">Other</option>
+                                <option value="guitar">Guitar</option>
+                                <option value="piano">Piano</option>
+                                <option value="drums">Drums</option>
+                                <option value="bass">Bass Guitar</option>
+                                <option value="violin">Violin</option>
+                                <option value="saxophone">Saxophone</option>
+                                <option value="trumpet">Trumpet</option>
+                                <option value="flute">Flute</option>
+                                <option value="clarinet">Clarinet</option>
+                                <option value="keyboard">Keyboard</option>
+                                <option value="ukulele">Ukulele</option>
+                                <option value="banjo">Banjo</option>
+                                <option value="harmonica">Harmonica</option>
+                                <option value="accordion">Accordion</option>
+                            </select>
+                            <br>
+                            <label for="description">Add the a description to your song/cover. For example the music sheet or anything you want</label>
+                            <br>
+                            <textarea name="description" id="description" cols="30" rows="10"></textarea>
+                            <br>
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
+                </div>
             {% else %}
                 <a class="login-link under" href="/signin">Sign in</a>
                 <a class="signup-link btn-12" href="/signup">
@@ -52,4 +114,9 @@
             {% endif %}
         </nav>
     </header>
+{% endblock %}
+{% block script %}
+    {% if logged %}
+        <script src="/scripts/postsong_popup.js"></script>
+    {% endif %}
 {% endblock %}

@@ -1,4 +1,4 @@
-.popup-background {
+.popup-background, .popup-background-post  {
     position: absolute;
     background: hsla(0, 0%, 0%, 0.7);
     inset: 0;
@@ -7,7 +7,8 @@
     justify-content: center;
     align-items: center;
 }
-.popup-background .popup-body {
+.popup-background .popup-body,
+.popup-background-post .popup-body-post {
     z-index: 11;
     background: var(--background);
 }

@@ -4,7 +4,7 @@
     <main class="profile-main">
         <section class="left-section">
             {% if userAccount %}
-                <button id="image-popup-open-btn" class="avatar" title="change profile picture"><img class="profile-img" src="{{ profileSrc }}"></button>
+                <button id="image-popup-open-btn" class="avatar one-by-one circle-container" title="change profile picture"><img class="profile-img" src="{{ profileSrc }}"></button>
                 <div class="popup-background">
                     <div class="popup-body">
                         <form action="/uploadProfilePicture" method="post" enctype="multipart/form-data">
