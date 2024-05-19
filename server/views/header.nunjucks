@@ -2,39 +2,54 @@
 
 {% block header %}
     <header class="between">
-        <p class="logo fs-15"><a href="/"><span>S</span>mall<span>S</span>ounds</a></p>
+        <p class="logo fs-15">
+            <a href="/">
+                <span>S</span>mall<span>S</span>ounds</a>
+        </p>
         <nav>
             {% if logged %}
-                <button class="nav-btn" id="search-btn"><i title="search a song or an artist" class="fa-solid fa-magnifying-glass"></i></button>
-                <a class="nav-a" href="/postSong"><i title="post a song" class="fa-solid fa-plus"></i></a>
-                <a class="nav-a" href="/inbox"><i title="inbox" class="fa-solid fa-inbox"></i></a>
+                <button class="nav-btn" id="search-btn">
+                    <i title="search a song or an artist" class="fa-solid fa-magnifying-glass"></i>
+                </button>
+                <button class="nav-a" >
+                    <i title="post a song" class="fa-solid fa-plus"></i>
+                </button>
+                <a class="nav-a" href="/inbox">
+                    <i title="inbox" class="fa-solid fa-inbox"></i>
+                </a>
                 <button class="profile-picture" id="modal-open-btn"><img src="{{ userSrc }}" alt="profile picture"></button>
-            {% else %}
-                <a class="login-link under" href="/signin">Sign in</a>
-                <a class="signup-link btn-12" href="/signup"><span>Sign up</span></a>
-            {% endif %}
-            <div class="modal-background">
-                <div class="modal-body">
-                    <div class="modal-row border-bottom align-center">
-                        <div>
-                            <img src="{{ userSrc }}" alt="profile picture">
-                            <p>{{ username }}</p>
+                <div class="modal-background">
+                    <div class="modal-body">
+                        <div class="modal-row border-bottom align-center">
+                            <div>
+                                <img src="{{ userSrc }}" alt="profile picture">
+                                <p>{{ username }}</p>
+                            </div>
+                            <button class="close-btn" id="modal-close-btn">&times;</button>
                         </div>
-                        <button class="close-btn" id="modal-close-btn">&times;</button>
-                    </div>
-                    <div class="modal-row border-bottom flex-column align-start">
-                        <a href="/profile/{{ username }}"><i class="fa-solid fa-user"></i> Your Profile</a>
-                        <a href="/likedPosts"><i class="fa-solid fa-heart"></i> Liked Posts</a>
-                        <a href="/playlists" class="text-color-primary"><i class="fa-solid fa-list"></i> Your Playlists</a>
-                    </div>
-                    <div class="modal-row border-bottom flex-column align-start">
-                        <a href="/following"><i class="fa-solid fa-people-group"></i> Following</a>
-                    </div>
-                    <div class="modal-row">
-                        <a href="/signout"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                        <div class="modal-row border-bottom flex-column align-start">
+                            <a href="/profile/{{ username }}">
+                                <i class="fa-solid fa-user"></i> Your Profile</a>
+                            <a href="/likedPosts">
+                                <i class="fa-solid fa-heart"></i> Liked Posts</a>
+                            <a href="/playlists" class="text-color-primary">
+                                <i class="fa-solid fa-list"></i> Your Playlists</a>
+                        </div>
+                        <div class="modal-row border-bottom flex-column align-start">
+                            <a href="/following">
+                                <i class="fa-solid fa-people-group"></i> Following</a>
+                        </div>
+                        <div class="modal-row">
+                            <a href="/signout">
+                                <i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {% else %}
+                <a class="login-link under" href="/signin">Sign in</a>
+                <a class="signup-link btn-12" href="/signup">
+                    <span>Sign up</span></a>
+            {% endif %}
         </nav>
-    </header> 
+    </header>
 {% endblock %}

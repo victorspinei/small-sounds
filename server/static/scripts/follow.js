@@ -1,5 +1,5 @@
-function followUser(username) {
-    const data = { username: username }
+function followUser(e, username) {
+    const data = { username: username };
     fetch('/follow', {
         method: 'POST',
         headers: {
@@ -9,11 +9,11 @@ function followUser(username) {
     })
     .then(response => {
         if (response.ok) {
-            // console.log('User followed successfully.');
-            document.getElementById('followButton').innerText = 'Unfollow';
-            document.getElementById('followButton').onclick = function() { 
-                unFollowUser(username); 
-            };
+            // Update button text and event listener
+            const button = e.target;
+            button.innerText = 'Unfollow';
+            button.removeEventListener('click', followUser);
+            button.addEventListener('click', (event) => unFollowUser(event, username));
         } else {
             console.error('Failed to follow user.');
         }
@@ -23,9 +23,9 @@ function followUser(username) {
     });
 }
 
-function unFollowUser(username) {
-    const data = { username: username }
-    fetch('/unFollow', {
+function unFollowUser(e, username) {
+    const data = { username: username };
+    fetch('/unFollow', { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -34,11 +34,11 @@ function unFollowUser(username) {
     })
     .then(response => {
         if (response.ok) {
-            // console.log('User unfollowed successfully.');
-            document.getElementById('followButton').innerText = 'Follow';
-            document.getElementById('followButton').onclick = function() {
-                followUser(username); 
-            };
+            // Update button text and event listener
+            const button = e.target;
+            button.innerText = 'Follow';
+            button.removeEventListener('click', unFollowUser);
+            button.addEventListener('click', (event) => followUser(event, username));
         } else {
             console.error('Failed to unfollow user.');
         }

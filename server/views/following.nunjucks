@@ -1,22 +1,23 @@
 {% extends "header.nunjucks" %}
 
 {% block main %}
-<main>
+<main class="main-following">
     {% for profile in following %}
-        <a href="/profile/{{ profile.username }}" class="following-profile mb-8">
-            <div class="circle-container">
-                <img src="{{ profile.picture }}" alt="{{ profile.username }}'s profile picture">
-            </div>
+        <div class="following-profile mb-8">
+            <a href="/profile/{{ profile.username }}">
+                <img class="profile-picture" src="{{ profile.picture }}" alt="{{ profile.username }}'s profile picture">
+            </a>
             <div>
-                <p>{{ profile.username }}</p>
+                <p class="following-username mb-8">{{ profile.username }}</p>
                 <p class="text-color-primary following-markdown">{{ profile.markdown }}</p>
             </div>
-            <button class="unfollow-button action-button">Unfollow</button>
-        </a>
+            <button class="unfollow-button action-button" data-username="{{ profile.username }}">Unfollow</button>
+        </div>
     {% endfor %}
 </main>
 {% endblock %}
 
-{% block scripts %}
+{% block script %}
     <script src="/scripts/following.js"></script>
+    <script src="/scripts/follow.js"></script>
 {% endblock %}

@@ -1,75 +1,87 @@
 {% extends "header.nunjucks" %}
 
 {% block main %}
-<main class="profile-main">
-    <section class="left-section">
-        {% if userAccount %}
-            <button id="image-popup-open-btn" class="avatar" title="change profile picture"><img class="profile-img" src="{{ profileSrc }}"></button>
-            <div class="popup-background">
-                <div class="popup-body">
-                    <form action="/uploadProfilePicture" method="post" enctype="multipart/form-data">
-                        <div class="flex-row">
-                            <label for="myPic">Upload an image</label>
-                            <button type="button" class="close-btn" id="popup-close-btn">&times;</button>
-                        </div>
-                        <input type="file" id="myPic" name="myPic">
-                        <button type="submit" class="submit-btn">Upload</button>
-                    </form>
-                </div>
-            </div>
-        {% else %}
-            <img class="profile-img" src="{{ profileSrc }}">
-        {% endif %}
-        <p class="username">{{ profileUsername }}</p>
-        {% if userAccount %} 
-        {% else %}
-            {% if isFollowing == true %}
-                <button id="followButton" class="action-button margin-16-0" onclick="unFollowUser('{{profileUsername}}')">Unfollow</button>
-            {% else %}
-                <button id="followButton" class="action-button margin-16-0" onclick="followUser('{{profileUsername}}')">Follow</button>
-            {% endif %}
-        {% endif %}
-        <p class="extra-info"><span class="text-color"><i class="fa-solid fa-people-group"></i> {{ followers }}</span> Followers &#x2022; <span class="text-color">{{ following }}</span> Following</p>
-    </section>
-    <section class="right-section">
-        <h2>Description:</h2>
-        <section class="description-section">
-            <div class="top-row">
-                <p>{{ profileUsername }}<span class="text-color-primary">/</span>README<span class="text-color-primary">.md</span></p>
-                {% if userAccount %}
-                    <a href="/updateProfileReadme"><i class="fa-solid fa-pencil" title="update profile readme"></i></a>
-                {% endif %} 
-            </div>
-            <md-block>{{ description }}</md-block>
-        </section>
-        {% if posts.length != 0 %}
-        <div>
-            <h2>Most Popular Posts:</h2>
-            <section class="post-section">
-                {% for post in posts %}
-                    <div class="post">
-                        <div class="post-info">
-                            <div class="post-top">
-                                <p class="post-title">{{ post.title }}</p>
-                                <p title="likes" class="like-btn"><i class="fa-solid fa-heart"></i><span class="likes-count">{{ post.likes }}</span></p>
-                                <p title="streams" class="streams" ><i class="fa-solid fa-music"></i><span class="streams-count">{{ post.streams }}</span></p>
-                                {% if userAccount %}
-                                    <a href="/edit/post?post_id={{post.post_id}}" title="edit" class="edit-btn"><i class="fa-solid fa-pencil"></i></a>
-                                {% endif %}
+    <main class="profile-main">
+        <section class="left-section">
+            {% if userAccount %}
+                <button id="image-popup-open-btn" class="avatar" title="change profile picture"><img class="profile-img" src="{{ profileSrc }}"></button>
+                <div class="popup-background">
+                    <div class="popup-body">
+                        <form action="/uploadProfilePicture" method="post" enctype="multipart/form-data">
+                            <div class="flex-row">
+                                <label for="myPic">Upload an image</label>
+                                <button type="button" class="close-btn" id="popup-close-btn">&times;</button>
                             </div>
-                            <p class="post-description">{{ post.description }}</p>
-                            <p style="display: none;" class="post_id">{{ post.post_id }}</p>
-                        </div>
-                        <audio controls>
-                            <source src="{{ post.file_name }}" type="audio/mpeg">
-                        </audio>
+                            <input type="file" id="myPic" name="myPic">
+                            <button type="submit" class="submit-btn">Upload</button>
+                        </form>
                     </div>
-                {% endfor %}
+                </div>
+            {% else %}
+                <img class="profile-img" src="{{ profileSrc }}">
+            {% endif %}
+            <p class="username">{{ profileUsername }}</p>
+            {% if userAccount %}
+            {% else %}
+                {% if isFollowing == true %}
+                    <button id="followButton" class="action-button margin-16-0">Unfollow</button>
+                {% else %}
+                    <button id="followButton" class="action-button margin-16-0">Follow</button>
+                {% endif %}
+            {% endif %}
+            <p class="extra-info">
+                <span class="text-color">
+                    <i class="fa-solid fa-people-group"></i>
+                    {{ followers }}</span> Followers &#x2022; <span class="text-color">{{ following }}</span> Following</p>
+        </section>
+        <section class="right-section">
+            <h2>Description:</h2>
+            <section class="description-section">
+                <div class="top-row">
+                    <p>{{ profileUsername }}
+                        <span class="text-color-primary">/</span>README<span class="text-color-primary">.md</span></p>
+                    {% if userAccount %}
+                        <a href="/updateProfileReadme">
+                            <i class="fa-solid fa-pencil" title="update profile readme"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <md-block>{{ description }}</md-block>
             </section>
-        </div>
-        {% endif %}
-    </section>
-</main>
+            {% if posts.length != 0 %}
+                <div>
+                    <h2>Most Popular Posts:</h2>
+                    <section class="post-section">
+                        {% for post in posts %}
+                            <div class="post">
+                                <div class="post-info">
+                                    <div class="post-top">
+                                        <p class="post-title">{{ post.title }}</p>
+                                        <p title="likes" class="like-btn">
+                                            <i class="fa-solid fa-heart"></i>
+                                            <span class="likes-count">{{ post.likes }}</span></p>
+                                        <p title="streams" class="streams" >
+                                            <i class="fa-solid fa-music"></i>
+                                            <span class="streams-count">{{ post.streams }}</span></p>
+                                        {% if userAccount %}
+                                            <a href="/edit/post?post_id={{post.post_id}}" title="edit" class="edit-btn">
+                                                <i class="fa-solid fa-pencil"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    <p class="post-description">{{ post.description }}</p>
+                                    <p style="display: none;" class="post_id">{{ post.post_id }}</p>
+                                </div>
+                                <audio controls>
+                                    <source src="{{ post.file_name }}" type="audio/mpeg">
+                                </audio>
+                            </div>
+                        {% endfor %}
+                    </section>
+                </div>
+            {% endif %}
+        </section>
+    </main>
 {% endblock %}
 
 {% block script %}
@@ -78,5 +90,19 @@
     {% else %}
         <script src="/scripts/follow.js"></script>
         <script src="/scripts/streams.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const followButton = document.getElementById('followButton');
+                const profileUsername = '{{ profileUsername }}';
+
+                followButton.addEventListener('click', (e) => {
+                    if (followButton.innerText === 'Follow') {
+                        followUser(e, profileUsername);
+                    } else {
+                        unFollowUser(e, profileUsername);
+                    }
+                });
+            });
+        </script>
     {% endif %}
 {% endblock %}

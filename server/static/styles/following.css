@@ -1,0 +1,32 @@
+.main-following .following-profile {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-decoration: none;
+    border: 1px solid var(--secondary);
+    padding: 0 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+}
+.main-following .profile-picture {
+    border-radius: 50%;
+    height: 100px;
+    width: 100px;
+}
+.main-following {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.following-username {
+    font-weight: 700;
+    color: var(--text);
+}
+.main-following .following-profile .action-button {
+    max-width: 100px;
+    z-index: 2;
+}

@@ -616,37 +616,88 @@ router.post('/follow', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
         const followerUsername = req.session.username || req.cookies.username;
         const followingUsername = req.body.username;
-        if (followerUsername == followingUsername) {
+
+        if (followerUsername === followingUsername) {
             res.status(400).send("You can't follow yourself!");
+            return;
         }
-        db.get('SELECT * FROM users WHERE username = ?', followerUsername, (selectingError, followerUser) => {
-            if (selectingError) {
-                console.error('Error selecting follower id:', selectingError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-            const followerId = followerUser.user_id;
-            db.get('SELECT * FROM users WHERE username = ?', followingUsername, (selectingError2, followingUser) => {
-                if (selectingError2) {
-                    console.error('Errof selecting following id:', selectingError2.message);
+
+        db.serialize(() => {
+            db.get('SELECT * FROM users WHERE username = ?', followerUsername, (err, followerUser) => {
+                if (err) {
+                    console.error('Error selecting follower id:', err.message);
                     res.status(500).send('Internal Server Error');
                     return;
                 }
-                const followingId = followingUser.user_id;
-                db.run('INSERT INTO followers (follower_user_id, following_user_id) VALUES (?, ?)', [followerId, followingId], (insertingError) => {
-                    if (insertingError) {
-                        console.error('Error inserting data into followers table:', insertingError.message);
+                if (!followerUser) {
+                    res.status(404).send('Follower user not found');
+                    return;
+                }
+
+                const followerId = followerUser.user_id;
+
+                db.get('SELECT * FROM users WHERE username = ?', followingUsername, (err, followingUser) => {
+                    if (err) {
+                        console.error('Error selecting following id:', err.message);
                         res.status(500).send('Internal Server Error');
                         return;
                     }
-                    res.status(200).send("User followed successfully");
-                })
+                    if (!followingUser) {
+                        res.status(404).send('Following user not found');
+                        return;
+                    }
+
+                    const followingId = followingUser.user_id;
+
+                    db.run('BEGIN TRANSACTION', (err) => {
+                        if (err) {
+                            console.error('Error beginning transaction:', err.message);
+                            res.status(500).send('Internal Server Error');
+                            return;
+                        }
+
+                        db.get('SELECT * FROM followers WHERE follower_user_id = ? AND following_user_id = ?', [followerId, followingId], (err, row) => {
+                            if (err) {
+                                console.error('Error selecting from followers:', err.message);
+                                res.status(500).send('Internal Server Error');
+                                db.run('ROLLBACK');
+                                return;
+                            }
+
+                            if (row) {
+                                res.status(400).send('Already following this user');
+                                db.run('ROLLBACK');
+                                return;
+                            }
+
+                            db.run('INSERT INTO followers (follower_user_id, following_user_id) VALUES (?, ?)', [followerId, followingId], (err) => {
+                                if (err) {
+                                    console.error('Error inserting into followers:', err.message);
+                                    res.status(500).send('Internal Server Error');
+                                    db.run('ROLLBACK');
+                                    return;
+                                }
+
+                                db.run('COMMIT', (err) => {
+                                    if (err) {
+                                        console.error('Error committing transaction:', err.message);
+                                        res.status(500).send('Internal Server Error');
+                                        return;
+                                    }
+
+                                    res.status(200).send('User followed successfully');
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
     } else {
         res.status(400).send("You need to be signed in!");
     }
 });
+
 
 router.post('/unFollow', (req, res) => {
     if (req.session.isLoggedIn || req.cookies.loggedIn) {
@@ -693,56 +744,76 @@ router.post('/recordSongView', (req, res) => {
         const username = req.session.username || req.cookies.username;
         const postId = req.body.songId;
 
-        db.all('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
-            if (selectionError) {
-                console.error('Error selecting data from users:', selectionError.message);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
-
-            if (user.length === 0) {
-                // User not found
-                console.error('User not found');
-                res.status(404).send('User not found');
-                return;
-            }
-            db.all('SELECt * FROM posts WHERE user_id = ? AND post_id = ?', [user[0].user_id, postId], (postSelectingError, post) => {
-                if (postSelectingError) {
-                    console.error('Error selecting data from posts:', postSelectingError.message);
+        db.serialize(() => {
+            db.get('SELECT * FROM users WHERE username = ?', username, (selectionError, user) => {
+                if (selectionError) {
+                    console.error('Error selecting data from users:', selectionError.message);
                     res.status(500).send('Internal Server Error');
                     return;
                 }
-                if (post.length !== 0) {
-                    res.status(404).send("You can't add views to your own songs by watching them");
+
+                if (!user) {
+                    console.error('User not found');
+                    res.status(404).send('User not found');
                     return;
                 }
 
-                db.run('INSERT INTO views (post_id) VALUES (?)', postId, function (err) {
-                    if (err) {
-                        console.error('Error inserting data into views table:', err.message);
+                db.get('SELECT * FROM posts WHERE user_id = ? AND post_id = ?', [user.user_id, postId], (postSelectingError, post) => {
+                    if (postSelectingError) {
+                        console.error('Error selecting data from posts:', postSelectingError.message);
                         res.status(500).send('Internal Server Error');
                         return;
                     }
 
-                    db.all('SELECT COUNT(*) AS count FROM views WHERE post_id = ?', postId, (viewsSelectingError, rows) => {
-                        if (viewsSelectingError) {
-                            console.error('Error selecting data from views:', viewsSelectingError.message);
+                    if (post) {
+                        res.status(400).send("You can't add views to your own songs by watching them");
+                        return;
+                    }
+
+                    db.run('BEGIN TRANSACTION', (err) => {
+                        if (err) {
+                            console.error('Error beginning transaction:', err.message);
                             res.status(500).send('Internal Server Error');
                             return;
                         }
 
-                        const views = rows[0].count;
-                        console.log(views);
-
-                        // Update the likes count for the post
-                        db.run("UPDATE posts SET streams = ? WHERE post_id = ?", [views, postId], updateErr => {
-                            if (updateErr) {
-                                console.error('Error updating streams count:', updateErr.message);
+                        db.run('INSERT INTO views (post_id) VALUES (?)', postId, (err) => {
+                            if (err) {
+                                console.error('Error inserting data into views table:', err.message);
                                 res.status(500).send('Internal Server Error');
+                                db.run('ROLLBACK');
                                 return;
                             }
 
-                            res.status(200).send(`Likes updated for post with ID ${postId}`);
+                            db.get('SELECT COUNT(*) AS count FROM views WHERE post_id = ?', postId, (viewsSelectingError, row) => {
+                                if (viewsSelectingError) {
+                                    console.error('Error selecting data from views:', viewsSelectingError.message);
+                                    res.status(500).send('Internal Server Error');
+                                    db.run('ROLLBACK');
+                                    return;
+                                }
+
+                                const views = row.count;
+
+                                db.run('UPDATE posts SET streams = ? WHERE post_id = ?', [views, postId], (updateErr) => {
+                                    if (updateErr) {
+                                        console.error('Error updating streams count:', updateErr.message);
+                                        res.status(500).send('Internal Server Error');
+                                        db.run('ROLLBACK');
+                                        return;
+                                    }
+
+                                    db.run('COMMIT', (commitErr) => {
+                                        if (commitErr) {
+                                            console.error('Error committing transaction:', commitErr.message);
+                                            res.status(500).send('Internal Server Error');
+                                            return;
+                                        }
+
+                                        res.status(200).send(`Views updated for post with ID ${postId}`);
+                                    });
+                                });
+                            });
                         });
                     });
                 });
